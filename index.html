@@ -2470,6 +2470,9 @@
         function initializeCategoryManagement() {
             loadManagedCategories();
             loadManagedIncomeSources();
+            if (typeof populateCategories === 'function') populateCategories();
+            if (typeof populateIncomeSources === 'function') populateIncomeSources();
+            if (typeof populateHistoryCategories === 'function') populateHistoryCategories();
             if (categoryManagementInitialized) return;
 
             const addBtn = document.getElementById('category-add-btn');
@@ -3370,6 +3373,12 @@
                     if (typeof initializeAdminPanel === 'function') {
                         initializeAdminPanel();
                     }
+
+                    // Ensure form dropdowns are populated on first visible load
+                    initializeCategoryManagement();
+                    if (typeof populateCategories === 'function') populateCategories();
+                    if (typeof populateIncomeSources === 'function') populateIncomeSources();
+                    if (typeof populateHistoryCategories === 'function') populateHistoryCategories();
                 }
             }
 
@@ -6953,6 +6962,11 @@
             if (typeof updateDashboardOverview === 'function') {
                 updateDashboardOverview();
             }
+
+            // Keep dropdowns ready even before a specific tab is opened
+            if (typeof populateCategories === 'function') populateCategories();
+            if (typeof populateIncomeSources === 'function') populateIncomeSources();
+            if (typeof populateHistoryCategories === 'function') populateHistoryCategories();
 
             // Always update Entry Tab Quick Stats (visible on default tab)
             if (typeof updateEntryTabStats === 'function') {
