@@ -24,37 +24,7 @@
     <!-- html2canvas for screenshot-based PDF export -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
-        // Example: Export table area to PDF using html2canvas
-        async function exportTableToPdfWithHtml2Canvas() {
-            const tableArea = document.querySelector('.transaction-table-area'); // Change selector as needed
-            if (!tableArea) {
-                alert('Table area not found!');
-                return;
-            }
-            const canvas = await html2canvas(tableArea, {
-                scale: 2
-            });
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new window.jspdf.jsPDF({
-                unit: 'pt',
-                format: 'a4'
-            });
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            // Fit image to page width
-            const imgWidth = pageWidth - 40;
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            pdf.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
-            pdf.save('table-export-html2canvas.pdf');
-        }
-        // Example: Add a button to trigger export
-        document.addEventListener('DOMContentLoaded', function() {
-            const btn = document.createElement('button');
-            btn.textContent = 'Export Table (html2canvas)';
-            btn.style = 'position:fixed;bottom:16px;right:16px;z-index:9999;padding:8px 16px;background:#6366f1;color:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 2px 8px #0002;';
-            btn.onclick = exportTableToPdfWithHtml2Canvas;
-            document.body.appendChild(btn);
-        });
+        // ...existing code...
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
