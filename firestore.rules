@@ -81,6 +81,68 @@ service cloud.firestore {
           && request.auth.token.email.lower() == request.resource.data.userEmail.lower()
         );
     }
+
+    function isValidLedgerType(value) {
+      return value is string
+        && (value == 'LENDING' || value == 'RECOVERY' || value == 'SALARY_PARTIAL');
+    }
+
+    function isValidLedgerStatus(value) {
+      return value is string
+        && (value == 'pending' || value == 'completed');
+    }
+
+    function isValidLedgerCurrency(value) {
+      return value is string
+        && (value == 'USD' || value == 'KHR');
+    }
+
+    function isValidRefMonth(value) {
+      return value is string && value.matches('^\\d{4}-\\d{2}$');
+    }
+
+    function isValidEntryDate(value) {
+      return value is string && value.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    function isValidLedgerPayload() {
+      return ('type' in request.resource.data)
+        && isValidLedgerType(request.resource.data.type)
+        && ('amount' in request.resource.data)
+        && (request.resource.data.amount is number)
+        && (request.resource.data.amount > 0)
+        && ('currency' in request.resource.data)
+        && isValidLedgerCurrency(request.resource.data.currency)
+        && ('original_amount' in request.resource.data)
+        && (request.resource.data.original_amount is number)
+        && (request.resource.data.original_amount > 0)
+        && ('status' in request.resource.data)
+        && isValidLedgerStatus(request.resource.data.status)
+        && ('entry_date' in request.resource.data)
+        && isValidEntryDate(request.resource.data.entry_date)
+        && (!('completed_date' in request.resource.data) || ((request.resource.data.completed_date is string) && (request.resource.data.completed_date == '' || isValidEntryDate(request.resource.data.completed_date))))
+        && ('ref_month' in request.resource.data)
+        && (request.resource.data.ref_month is string)
+        && (request.resource.data.ref_month == '' || isValidRefMonth(request.resource.data.ref_month))
+        && ('person_name' in request.resource.data)
+        && (request.resource.data.person_name is string)
+        && (!('contact_note' in request.resource.data) || request.resource.data.contact_note is string)
+        && ('userId' in request.resource.data)
+        && (request.resource.data.userId is string);
+    }
+
+    function isValidLedgerCreatePayload() {
+      return isValidLedgerPayload()
+        && (request.resource.data.userId == request.auth.uid)
+        && isCreateEmailOwner();
+    }
+
+    function isValidLedgerUpdatePayload() {
+      return isValidLedgerPayload()
+        && (request.resource.data.userId == resource.data.userId)
+        && (!('userEmail' in resource.data) || request.resource.data.userEmail == resource.data.userEmail)
+        && (!('groupId' in resource.data) || request.resource.data.groupId == resource.data.groupId);
+    }
     
     // ============================================
     // USERS COLLECTION (Protected)
@@ -138,6 +200,25 @@ service cloud.firestore {
 
       // Users can only update/delete their own incomes, Admins can update/delete all
       allow update, delete: if isAllowedSharedEmail()
+        && ((resource.data.userId == request.auth.uid) || isEmailOwner() || isSharedGroupDoc() || isTwoEmailLegacyDoc() || isAdmin());
+    }
+
+    // ============================================
+    // FINANCIAL LEDGER COLLECTION
+    // ============================================
+    match /financial_ledger/{ledgerId} {
+      allow read: if isAllowedSharedEmail()
+        && ((resource.data.userId == request.auth.uid) || isEmailOwner() || isSharedGroupDoc() || isTwoEmailLegacyDoc() || isAdmin());
+
+      allow create: if isAllowedSharedEmail()
+        && isValidLedgerCreatePayload()
+        && (isSharedGroupCreateDoc() || isTwoEmailLegacyCreateDoc());
+
+      allow update: if isAllowedSharedEmail()
+        && ((resource.data.userId == request.auth.uid) || isEmailOwner() || isSharedGroupDoc() || isTwoEmailLegacyDoc() || isAdmin())
+        && isValidLedgerUpdatePayload();
+
+      allow delete: if isAllowedSharedEmail()
         && ((resource.data.userId == request.auth.uid) || isEmailOwner() || isSharedGroupDoc() || isTwoEmailLegacyDoc() || isAdmin());
     }
     

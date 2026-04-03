@@ -472,6 +472,9 @@
                     <button class="tab-button flex-1 py-3 px-4 text-center rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2" data-tab="income">
                         <i class="fas fa-hand-holding-dollar"></i> Add Income
                     </button>
+                    <button class="tab-button flex-1 py-3 px-4 text-center rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2" data-tab="ledger">
+                        <i class="fas fa-book"></i> Ledger
+                    </button>
                     <button class="tab-button flex-1 py-3 px-4 text-center rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2" data-tab="history">
                         <i class="fas fa-clock-rotate-left"></i> History
                     </button>
@@ -987,48 +990,210 @@
                 </div>
             </div>
 
-            <div id="history-tab" class="tab-content hidden">
-                <div class="glass-panel p-5 md:p-6 rounded-2xl shadow-xl">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-5">
-                        <h2 class="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-3">
-                            <span class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                                <i class="fas fa-history text-purple-600"></i>
-                            </span> Transaction History
+            <div id="ledger-tab" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <div class="lg:col-span-1 glass-panel p-5 md:p-6 rounded-2xl h-min sticky top-4 shadow-xl">
+                        <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-5 flex items-center gap-3">
+                            <span class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-book text-blue-600"></i>
+                            </span> Financial Ledger
                         </h2>
-                        <div class="flex items-center gap-2 mt-4 md:mt-0">
-                            <!-- Admin User Selector for History -->
-                            <div id="admin-user-selector-history" class="hidden admin-view-selector">
-                                <span class="view-label"><i class="fas fa-crown"></i><span>View as</span></span>
-                                <select id="admin-view-user-history">
-                                    <option value="">My Data</option>
-                                </select>
+                        <form id="ledger-form" class="space-y-4">
+                            <div class="ledger-form-grid-mobile">
+                                <div class="ledger-field ledger-field-type">
+                                    <label for="ledger-type" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Type</label>
+                                    <select id="ledger-type" required class="glass-input block w-full rounded-xl text-gray-800 cursor-pointer">
+                                        <option value="LENDING">LENDING</option>
+                                        <option value="RECOVERY">RECOVERY</option>
+                                        <option value="SALARY_PARTIAL">SALARY_PARTIAL</option>
+                                    </select>
+                                </div>
+
+                                <div class="ledger-field ledger-field-amount">
+                                    <label for="ledger-amount" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Amount</label>
+                                    <input type="text" inputmode="decimal" pattern="[0-9.]*" id="ledger-amount" required class="glass-input block w-full rounded-xl font-semibold text-gray-800" placeholder="0.00">
+                                </div>
+
+                                <div class="ledger-field ledger-field-currency">
+                                    <label for="ledger-currency" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Currency</label>
+                                    <select id="ledger-currency" class="glass-input block w-full rounded-xl text-gray-800 cursor-pointer">
+                                        <option value="USD">USD</option>
+                                        <option value="KHR">KHR</option>
+                                    </select>
+                                </div>
+
+                                <div class="ledger-field ledger-field-refmonth">
+                                    <label for="ledger-ref-month" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Ref Month</label>
+                                    <input type="month" id="ledger-ref-month" class="glass-input block w-full rounded-xl text-gray-800">
+                                </div>
+
+                                <div class="ledger-field ledger-field-entrydate">
+                                    <label for="ledger-entry-date" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Entry Date</label>
+                                    <input type="date" id="ledger-entry-date" required class="glass-input block w-full rounded-xl text-gray-800">
+                                </div>
+
+                                <div class="ledger-field ledger-field-status">
+                                    <label for="ledger-status" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Status</label>
+                                    <select id="ledger-status" class="glass-input block w-full rounded-xl text-gray-800 cursor-pointer">
+                                        <option value="pending">pending</option>
+                                        <option value="completed">completed</option>
+                                    </select>
+                                </div>
+
+                                <div class="ledger-field ledger-field-person">
+                                    <label for="ledger-person-name" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Person Name</label>
+                                    <input type="text" id="ledger-person-name" maxlength="80" class="glass-input block w-full rounded-xl text-gray-800" placeholder="Required for lending/recovery">
+                                </div>
+
+                                <div class="ledger-field ledger-field-note">
+                                    <label for="ledger-contact-note" class="block text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1">Contact / Note</label>
+                                    <input type="text" id="ledger-contact-note" maxlength="160" class="glass-input block w-full rounded-xl text-gray-800" placeholder="Phone number or short note">
+                                </div>
                             </div>
-                            <button id="export-history-csv-btn" class="hidden md:inline-flex bg-emerald-500/90 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
-                                <i class="fas fa-file-csv mr-1"></i> CSV
-                            </button>
-                            <button id="export-history-pdf-btn" class="bg-indigo-500/90 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
-                                <i class="fas fa-file-pdf mr-1"></i> PDF
-                            </button>
-                        </div>
+
+                            <p id="ledger-usd-preview" class="text-xs text-slate-600 font-semibold">Equivalent USD: $0.00</p>
+
+                            <div id="ledger-editing-indicator" class="hidden text-xs font-semibold rounded-lg border border-blue-200 bg-blue-50 text-blue-700 px-3 py-2">
+                                Editing selected ledger entry
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="submit" id="ledger-submit-button" class="w-full py-3 px-4 rounded-xl text-white font-semibold bg-gradient-to-r from-blue-500 to-cyan-600 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 transition duration-300">
+                                    <i class="fas fa-save"></i> Save Ledger Entry
+                                </button>
+                                <button type="button" id="ledger-cancel-edit-button" class="hidden w-full py-3 px-4 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition duration-300 border border-gray-300">
+                                    Cancel Edit
+                                </button>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="lg:grid lg:grid-cols-12 lg:gap-5 lg:items-start">
-                        <div class="mb-5 lg:mb-0 p-4 bg-white/30 rounded-2xl border border-white/40 shadow-inner space-y-3 history-filters lg:col-span-3 xl:col-span-3 lg:sticky lg:top-4">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="glass-panel p-5 md:p-6 rounded-2xl shadow-xl">
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
+                                <h3 class="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-3">
+                                    <span class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-chart-simple text-emerald-600"></i>
+                                    </span> Salary Progress
+                                </h3>
+                                <div id="ledger-salary-controls" class="ledger-salary-controls w-full md:w-auto">
+                                    <input type="month" id="ledger-month-focus" class="glass-input rounded-lg text-sm text-gray-700">
+                                    <div id="ledger-salary-target-group" class="ledger-salary-target-group">
+                                        <input type="number" min="0" step="0.01" id="ledger-salary-target" class="glass-input rounded-lg text-sm text-gray-700" placeholder="Target">
+                                        <select id="ledger-salary-target-currency" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
+                                            <option value="USD">USD</option>
+                                            <option value="KHR">KHR</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" id="ledger-save-target-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">Save Target</button>
+                                </div>
+                            </div>
+                            <div class="mb-2 flex items-center justify-between text-sm font-semibold text-gray-700">
+                                <span id="ledger-progress-text">Progress: $0.00 / $0.00</span>
+                                <span id="ledger-progress-percent">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                <div id="ledger-progress-bar" class="h-3 bg-gradient-to-r from-emerald-500 to-cyan-500" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-5 md:p-6 rounded-2xl shadow-xl">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div id="ledger-card-lending" class="rounded-xl bg-red-50 border border-red-100 p-3">
+                                    <div class="text-xs text-red-600 font-semibold">Lending</div>
+                                    <div id="ledger-total-lending" class="text-lg font-bold text-red-700">$0.00</div>
+                                </div>
+                                <div id="ledger-card-recovery" class="rounded-xl bg-green-50 border border-green-100 p-3">
+                                    <div class="text-xs text-green-600 font-semibold">Recovery</div>
+                                    <div id="ledger-total-recovery" class="text-lg font-bold text-green-700">$0.00</div>
+                                </div>
+                                <div id="ledger-card-salary" class="rounded-xl bg-blue-50 border border-blue-100 p-3">
+                                    <div class="text-xs text-blue-600 font-semibold">Salary Partial</div>
+                                    <div id="ledger-total-salary" class="text-lg font-bold text-blue-700">$0.00</div>
+                                </div>
+                                <div id="ledger-card-net" class="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                                    <div class="text-xs text-slate-600 font-semibold">Ledger Net Effect</div>
+                                    <div id="ledger-net-impact" class="text-lg font-bold text-slate-700">$0.00</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel p-5 md:p-6 rounded-2xl shadow-xl">
+                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-800">Ledger Transactions</h3>
+                                    <div class="flex items-center gap-2 mt-2 md:mt-0">
+                                        <label for="ledger-view-filter" class="text-sm font-semibold text-gray-600">View:</label>
+                                        <select id="ledger-view-filter" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
+                                            <option value="selected-month">Selected Month</option>
+                                            <option value="all-months">View All Months</option>
+                                            <option value="all-pending">View All Pending</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="export-ledger-csv-btn" class="hidden md:inline-flex bg-emerald-500/90 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
+                                        <i class="fas fa-file-csv mr-1"></i> CSV
+                                    </button>
+                                    <button id="export-ledger-pdf-btn" class="bg-indigo-500/90 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
+                                        <i class="fas fa-file-pdf mr-1"></i> PDF
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="ledger-empty-state" class="text-center py-10 text-gray-500">
+                                <i class="fas fa-book-open text-4xl mb-2 opacity-50"></i>
+                                <p>No ledger entries yet.</p>
+                            </div>
+                            <div id="ledger-mobile-cards" class="ledger-mobile-cards hidden space-y-3 mb-3"></div>
+                            <div class="ledger-table-container overflow-x-auto max-h-[420px]">
+                                <table class="ledger-table min-w-full text-sm">
+                                    <thead>
+                                        <tr class="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+                                            <th class="py-2 pr-3">Date</th>
+                                            <th class="py-2 pr-3">Type</th>
+                                            <th class="py-2 pr-3">Amount</th>
+                                            <th class="py-2 pr-3">Contact/Note</th>
+                                            <th class="py-2 pr-3">Ref Month</th>
+                                            <th class="py-2 pr-3">Person</th>
+                                            <th class="py-2 pr-3">Status</th>
+                                            <th class="py-2 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ledger-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="history-tab" class="tab-content hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <div class="lg:col-span-1 glass-panel p-5 md:p-6 rounded-2xl h-min sticky top-4 shadow-xl history-filters">
+                        <h2 class="text-lg md:text-xl font-bold text-gray-800 mb-5 flex items-center gap-3">
+                            <span class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-filter text-purple-600"></i>
+                            </span> History Filters
+                        </h2>
+                        <div class="space-y-4">
+                            <div class="rounded-xl bg-indigo-50/70 border border-indigo-100 px-3 py-2 text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                                Input Panel
+                            </div>
                             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-1 gap-3 filter-row-mobile">
                                 <select id="history-filter-type" class="glass-input w-full rounded-lg text-sm text-gray-700">
-                                <option value="">All Types</option>
-                                <option value="expense">Expenses</option>
-                                <option value="income">Income</option>
-                            </select>
+                                    <option value="">All Types</option>
+                                    <option value="expense">Expenses</option>
+                                    <option value="income">Income</option>
+                                </select>
                                 <select id="history-filter-category" class="glass-input w-full rounded-lg text-sm text-gray-700"><option value="">All Categories</option></select>
                                 <select id="history-filter-user" class="glass-input w-full rounded-lg text-sm text-gray-700"><option value="">All Users</option></select>
                                 <div class="sort-month-row-mobile flex flex-row lg:flex-col gap-2 col-span-2 md:col-span-1 lg:col-span-1">
                                     <select id="history-sort-by" class="glass-input w-full rounded-lg text-sm text-gray-700">
-                                    <option value="date-desc">Newest First</option>
-                                    <option value="date-asc">Oldest First</option>
-                                    <option value="amount-desc">Highest Amount</option>
-                                    <option value="amount-asc">Lowest Amount</option>
-                                </select>
+                                        <option value="date-desc">Newest First</option>
+                                        <option value="date-asc">Oldest First</option>
+                                        <option value="amount-desc">Highest Amount</option>
+                                        <option value="amount-asc">Lowest Amount</option>
+                                    </select>
                                     <select id="history-filter-month" class="glass-input w-full rounded-lg text-sm text-gray-700"><option value="">All Months</option></select>
                                 </div>
                             </div>
@@ -1044,9 +1209,35 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="lg:col-span-9 xl:col-span-9 space-y-4 min-w-0 history-right-panel">
-                            <!-- Card View (mobile + desktop) -->
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="glass-panel p-5 md:p-6 rounded-2xl shadow-xl history-right-panel">
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
+                                <div>
+                                    <h2 class="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-3">
+                                        <span class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                            <i class="fas fa-history text-purple-600"></i>
+                                        </span> Transaction History
+                                    </h2>
+                                    <p class="text-xs text-gray-600 mt-1">List Data Panel</p>
+                                </div>
+                                <div class="flex items-center gap-2 mt-2 md:mt-0">
+                                    <div id="admin-user-selector-history" class="hidden admin-view-selector">
+                                        <span class="view-label"><i class="fas fa-crown"></i><span>View as</span></span>
+                                        <select id="admin-view-user-history">
+                                            <option value="">My Data</option>
+                                        </select>
+                                    </div>
+                                    <button id="export-history-csv-btn" class="hidden md:inline-flex bg-emerald-500/90 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
+                                        <i class="fas fa-file-csv mr-1"></i> CSV
+                                    </button>
+                                    <button id="export-history-pdf-btn" class="bg-indigo-500/90 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
+                                        <i class="fas fa-file-pdf mr-1"></i> PDF
+                                    </button>
+                                </div>
+                            </div>
+
                             <div id="history-cards-container" class="space-y-2 max-h-[calc(100vh-280px)] md:max-h-[700px] lg:max-h-[calc(100vh-320px)] ios-scroll elastic-scroll" style="-webkit-overflow-scrolling: touch; touch-action: pan-y; overscroll-behavior: contain;">
                                 <div id="history-empty-state" class="text-center py-12 text-gray-500">
                                     <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
@@ -1054,7 +1245,6 @@
                                 </div>
                             </div>
 
-                            <!-- Desktop Table View (hidden - using card view instead) -->
                             <div class="hidden overflow-x-auto max-h-[500px] md:max-h-[700px] relative rounded-xl border border-white/30 shadow-sm bg-white/20 history-table-container min-w-0">
                                 <table class="min-w-full divide-y divide-gray-200/50">
                                     <thead class="sticky-header">
@@ -1101,12 +1291,12 @@
                     <!-- Report Header -->
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h2 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md flex items-center gap-3">
-                                <span class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                                    <i class="fas fa-chart-line text-white"></i>
+                            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
+                                <span class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-amber-600"></i>
                                 </span> Financial Analytics
                             </h2>
-                            <p class="text-white/70 mt-1 text-sm">Track your financial performance and insights</p>
+                            <p class="text-gray-600 mt-1 text-sm">Track your financial performance and insights</p>
                         </div>
                         <!-- Admin User Selector -->
                         <div id="admin-user-selector-report" class="hidden admin-view-selector">
@@ -1153,6 +1343,96 @@
                             <div class="stat-icon info"><i class="fas fa-wallet"></i></div>
                             <p class="stat-label">Net Balance</p>
                             <p id="net-balance" class="stat-value text-blue-600">$0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 report-kpi-grid">
+                        <div class="stat-card-pro report-kpi-card">
+                            <div class="stat-icon success"><i class="fas fa-coins"></i></div>
+                            <p class="stat-label">Total Cash In</p>
+                            <p id="report-total-cash-in" class="stat-value text-green-600">$0.00</p>
+                        </div>
+                        <div class="stat-card-pro report-kpi-card">
+                            <div class="stat-icon danger"><i class="fas fa-arrow-down"></i></div>
+                            <p class="stat-label">Total Cash Out</p>
+                            <p id="report-total-cash-out" class="stat-value text-red-600">$0.00</p>
+                        </div>
+                        <div class="stat-card-pro balance report-kpi-card">
+                            <div class="stat-icon info"><i class="fas fa-scale-balanced"></i></div>
+                            <p class="stat-label">Net Cash Flow</p>
+                            <p id="report-net-cash-flow" class="stat-value text-blue-600">$0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5 md:p-6 rounded-2xl shadow-xl">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-3">
+                                    <span class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-sliders text-amber-600"></i>
+                                    </span> Report Range
+                                </h3>
+                                <p class="text-sm text-gray-600 mt-1">Choose a monthly, yearly, or custom date range for aggregation and export.</p>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full lg:w-auto">
+                                <select id="report-range-mode" class="glass-input rounded-lg text-sm text-gray-700">
+                                    <option value="month">Monthly Report</option>
+                                    <option value="year">Annual Report</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                                <input type="month" id="report-range-month" class="glass-input rounded-lg text-sm text-gray-700">
+                                <input type="number" min="2000" max="2100" step="1" id="report-range-year" class="glass-input rounded-lg text-sm text-gray-700" placeholder="Year">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="report-range-start" class="glass-input rounded-lg text-sm text-gray-700">
+                                    <input type="date" id="report-range-end" class="glass-input rounded-lg text-sm text-gray-700">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="text-xs uppercase tracking-wider text-gray-500 font-semibold">Selected Range</p>
+                                <p id="report-range-label" class="text-sm font-bold text-gray-800">Monthly report</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="report-export-csv-btn" class="hidden md:inline-flex bg-emerald-500/90 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
+                                    <i class="fas fa-file-csv mr-1"></i> CSV
+                                </button>
+                                <button id="report-export-pdf-btn" class="bg-indigo-500/90 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
+                                    <i class="fas fa-file-pdf mr-1"></i> PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-3">
+                                    <span class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                                        <i class="fas fa-circle-exclamation text-red-600"></i>
+                                    </span> Outstanding Debts Summary
+                                </h3>
+                                <p id="report-debt-summary-caption" class="text-sm text-gray-600 mt-1">Pending lending items as of the selected report date.</p>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                <span id="report-debt-count" class="font-bold text-gray-800">0</span> debtors
+                            </div>
+                        </div>
+                        <div id="report-debt-cards" class="report-debt-cards hidden space-y-3 mb-3"></div>
+                        <div class="report-debt-table-container overflow-x-auto">
+                            <table class="report-debt-table min-w-full text-sm">
+                                <thead>
+                                    <tr class="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
+                                        <th class="py-2 pr-3">Person</th>
+                                        <th class="py-2 pr-3">Entries</th>
+                                        <th class="py-2 pr-3">Outstanding USD</th>
+                                        <th class="py-2 pr-3">Oldest Entry</th>
+                                        <th class="py-2 pr-3">Latest Entry</th>
+                                        <th class="py-2 pr-3">Contact/Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="report-debt-table-body"></tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -3185,6 +3465,8 @@
                 sortBy: 'date-desc'
             };
             let incomes = [];
+            let financialLedger = [];
+            let editingLedgerEntryId = null;
             let currentIncomeFilters = {
                 source: '',
                 user: '',
@@ -3208,6 +3490,50 @@
             let deleteIncomeId = null;
             let pieChart, barChart, lineChart;
             let monthPieChart, monthLineChart;
+            const LEDGER_TYPES = {
+                LENDING: 'LENDING',
+                RECOVERY: 'RECOVERY',
+                SALARY_PARTIAL: 'SALARY_PARTIAL'
+            };
+            let salaryTargetsByMonth = JSON.parse(localStorage.getItem('salaryTargetsByMonth') || '{}');
+
+            function saveSalaryTargets() {
+                localStorage.setItem('salaryTargetsByMonth', JSON.stringify(salaryTargetsByMonth));
+            }
+
+            function getSalaryTargetUSD(monthKey) {
+                const target = salaryTargetsByMonth[monthKey];
+                if (!target) return 0;
+                if (typeof target === 'number') {
+                    return target;
+                }
+                if (target.currency === 'KHR') {
+                    return convertToUSD(target.amount, 'KHR');
+                }
+                return target.amount || 0;
+            }
+
+            function getSalaryTargetDisplay(monthKey) {
+                const target = salaryTargetsByMonth[monthKey];
+                if (!target) return {
+                    usd: 0,
+                    original: 0,
+                    currency: 'USD'
+                };
+                if (typeof target === 'number') {
+                    return {
+                        usd: target,
+                        original: target,
+                        currency: 'USD'
+                    };
+                }
+                const usd = target.currency === 'KHR' ? convertToUSD(target.amount, 'KHR') : target.amount;
+                return {
+                    usd,
+                    original: target.amount || 0,
+                    currency: target.currency || 'USD'
+                };
+            }
 
             // ---------------------------
             // Firebase Initialization & Authentication
@@ -3259,6 +3585,7 @@
                     // Unsubscribe previous listeners if any
                     if (firestoreUnsubscribe.expenses) firestoreUnsubscribe.expenses();
                     if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
+                    if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
                     firestoreUnsubscribe = {};
                     // Start new listeners for the current user (each user has their own data)
                     startFirestoreListener(currentUser.uid);
@@ -3274,8 +3601,10 @@
                 // 1. Clear previous state
                 expenses = [];
                 incomes = [];
+                financialLedger = [];
                 if (firestoreUnsubscribe.expenses) firestoreUnsubscribe.expenses();
                 if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
+                if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
                 firestoreUnsubscribe = {};
 
                 if (user) {
@@ -3324,7 +3653,8 @@
             function startFirestoreListener(groupId, options = {}) {
                 let syncCompleted = {
                     expenses: false,
-                    incomes: false
+                    incomes: false,
+                    ledger: false
                 };
                 let initialSyncNotified = false;
                 const currentUserEmail = (currentUser && currentUser.email ? currentUser.email.toLowerCase() : '');
@@ -3336,6 +3666,9 @@
                 const incomeDocsByUid = new Map();
                 const incomeDocsByEmail = new Map();
                 const incomeDocsBySharedEmails = new Map();
+                const ledgerDocsByUid = new Map();
+                const ledgerDocsByEmail = new Map();
+                const ledgerDocsBySharedEmails = new Map();
 
                 const expenseStreamReady = {
                     uid: false,
@@ -3343,6 +3676,11 @@
                     sharedEmails: !useSharedGroup
                 };
                 const incomeStreamReady = {
+                    uid: false,
+                    email: useSharedGroup ? true : currentUserEmail === '',
+                    sharedEmails: !useSharedGroup
+                };
+                const ledgerStreamReady = {
                     uid: false,
                     email: useSharedGroup ? true : currentUserEmail === '',
                     sharedEmails: !useSharedGroup
@@ -3357,6 +3695,12 @@
                 function mergeIncomeDocs() {
                     const merged = new Map([...incomeDocsBySharedEmails, ...incomeDocsByEmail, ...incomeDocsByUid]);
                     incomes = Array.from(merged.values());
+                    updateUI();
+                }
+
+                function mergeLedgerDocs() {
+                    const merged = new Map([...ledgerDocsBySharedEmails, ...ledgerDocsByEmail, ...ledgerDocsByUid]);
+                    financialLedger = Array.from(merged.values());
                     updateUI();
                 }
 
@@ -3397,8 +3741,35 @@
                     });
                 }
 
+                function mapLedgerSnapshot(snapshot, targetMap) {
+                    targetMap.clear();
+                    snapshot.forEach(doc => {
+                        const data = doc.data() || {};
+                        const currency = data.currency === 'KHR' ? 'KHR' : 'USD';
+                        const originalAmount = parseFloat(data.original_amount);
+                        const normalizedOriginalAmount = Number.isFinite(originalAmount) && originalAmount > 0 ? originalAmount : (parseFloat(data.amount) || 0);
+                        targetMap.set(doc.id, {
+                            id: doc.id,
+                            type: data.type || '',
+                            amount: parseFloat(data.amount) || 0,
+                            currency,
+                            original_amount: normalizedOriginalAmount,
+                            ref_month: data.ref_month || '',
+                            person_name: data.person_name || '',
+                            contact_note: data.contact_note || '',
+                            status: data.status || 'pending',
+                            entry_date: data.entry_date || '',
+                            completed_date: data.completed_date || '',
+                            userId: data.userId,
+                            userEmail: data.userEmail || '',
+                            groupId: data.groupId,
+                            timestamp: data.timestamp && data.timestamp.toDate ? data.timestamp.toDate() : null
+                        });
+                    });
+                }
+
                 function checkSyncComplete() {
-                    if (syncCompleted.expenses && syncCompleted.incomes) {
+                    if (syncCompleted.expenses && syncCompleted.incomes && syncCompleted.ledger) {
                         if (!initialSyncNotified && typeof options.onInitialSyncComplete === 'function') {
                             initialSyncNotified = true;
                             options.onInitialSyncComplete();
@@ -3605,6 +3976,77 @@
                         });
                 }
 
+                // --- Firestore Query for Financial Ledger by UID ---
+                const unsubscribeLedgerByUid = db.collection('financial_ledger')
+                    .where(useSharedGroup ? 'groupId' : 'userId', '==', useSharedGroup ? SHARED_GROUP_ID : groupId)
+                    .onSnapshot({
+                        includeMetadataChanges: true
+                    }, snapshot => {
+                        mapLedgerSnapshot(snapshot, ledgerDocsByUid);
+                        ledgerStreamReady.uid = true;
+                        syncCompleted.ledger = ledgerStreamReady.uid && ledgerStreamReady.email && ledgerStreamReady.sharedEmails;
+                        mergeLedgerDocs();
+                        if (!snapshot.metadata.fromCache) {
+                            checkSyncComplete();
+                        } else if (financialLedger.length > 0 || ledgerStreamReady.email) {
+                            checkSyncComplete();
+                        }
+                    }, err => {
+                        console.error('Firebase ledger error:', err);
+                        showMessage('Ledger connection error: ' + err.message, 'error');
+                        ledgerStreamReady.uid = true;
+                        syncCompleted.ledger = ledgerStreamReady.uid && ledgerStreamReady.email && ledgerStreamReady.sharedEmails;
+                        checkSyncComplete();
+                    });
+
+                let unsubscribeLedgerByEmail = null;
+                if (!useSharedGroup && currentUserEmail) {
+                    unsubscribeLedgerByEmail = db.collection('financial_ledger')
+                        .where('userEmail', '==', currentUserEmail)
+                        .onSnapshot({
+                            includeMetadataChanges: true
+                        }, snapshot => {
+                            mapLedgerSnapshot(snapshot, ledgerDocsByEmail);
+                            ledgerStreamReady.email = true;
+                            syncCompleted.ledger = ledgerStreamReady.uid && ledgerStreamReady.email && ledgerStreamReady.sharedEmails;
+                            mergeLedgerDocs();
+                            if (!snapshot.metadata.fromCache) {
+                                checkSyncComplete();
+                            } else if (financialLedger.length > 0 || ledgerStreamReady.uid) {
+                                checkSyncComplete();
+                            }
+                        }, err => {
+                            console.error('Firebase ledger email fallback error:', err);
+                            ledgerStreamReady.email = true;
+                            syncCompleted.ledger = ledgerStreamReady.uid && ledgerStreamReady.email && ledgerStreamReady.sharedEmails;
+                            checkSyncComplete();
+                        });
+                }
+
+                let unsubscribeLedgerBySharedEmails = null;
+                if (useSharedGroup) {
+                    unsubscribeLedgerBySharedEmails = db.collection('financial_ledger')
+                        .where('userEmail', 'in', ALLOWED_EMAILS)
+                        .onSnapshot({
+                            includeMetadataChanges: true
+                        }, snapshot => {
+                            mapLedgerSnapshot(snapshot, ledgerDocsBySharedEmails);
+                            ledgerStreamReady.sharedEmails = true;
+                            syncCompleted.ledger = ledgerStreamReady.uid && ledgerStreamReady.email && ledgerStreamReady.sharedEmails;
+                            mergeLedgerDocs();
+                            if (!snapshot.metadata.fromCache) {
+                                checkSyncComplete();
+                            } else if (financialLedger.length > 0 || ledgerStreamReady.uid) {
+                                checkSyncComplete();
+                            }
+                        }, err => {
+                            console.error('Firebase ledger shared-email fallback error:', err);
+                            ledgerStreamReady.sharedEmails = true;
+                            syncCompleted.ledger = ledgerStreamReady.uid && ledgerStreamReady.email && ledgerStreamReady.sharedEmails;
+                            checkSyncComplete();
+                        });
+                }
+
                 firestoreUnsubscribe.expenses = () => {
                     unsubscribeExpensesByUid();
                     if (unsubscribeExpensesByEmail) unsubscribeExpensesByEmail();
@@ -3615,6 +4057,12 @@
                     unsubscribeIncomesByUid();
                     if (unsubscribeIncomesByEmail) unsubscribeIncomesByEmail();
                     if (unsubscribeIncomesBySharedEmails) unsubscribeIncomesBySharedEmails();
+                };
+
+                firestoreUnsubscribe.ledger = () => {
+                    unsubscribeLedgerByUid();
+                    if (unsubscribeLedgerByEmail) unsubscribeLedgerByEmail();
+                    if (unsubscribeLedgerBySharedEmails) unsubscribeLedgerBySharedEmails();
                 };
             }
 
@@ -3658,6 +4106,97 @@
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 }).format(numAmount);
+            }
+
+            function normalizeLedgerType(type) {
+                const upper = String(type || '').toUpperCase();
+                if (upper === LEDGER_TYPES.LENDING || upper === LEDGER_TYPES.RECOVERY || upper === LEDGER_TYPES.SALARY_PARTIAL) {
+                    return upper;
+                }
+                return '';
+            }
+
+            function getLedgerMonthKey(entry) {
+                if (!entry) return '';
+                if (entry.type === LEDGER_TYPES.SALARY_PARTIAL && entry.ref_month) return entry.ref_month;
+                if (entry.status === 'completed') {
+                    return (entry.completed_date || entry.entry_date || '').slice(0, 7);
+                }
+                return (entry.entry_date || '').slice(0, 7);
+            }
+
+            function getLedgerViewMonthKey(entry) {
+                if (!entry) return '';
+                if (entry.type === LEDGER_TYPES.SALARY_PARTIAL && entry.ref_month) return entry.ref_month;
+                if (entry.status === 'completed') {
+                    return (entry.completed_date || entry.entry_date || '').slice(0, 7);
+                }
+                return (entry.entry_date || '').slice(0, 7);
+            }
+
+            function isPendingLending(entry) {
+                return entry && entry.type === LEDGER_TYPES.LENDING && entry.status === 'pending';
+            }
+
+            function isCarryOverPendingLending(entry, selectedMonth) {
+                if (!isPendingLending(entry) || !selectedMonth) return false;
+                const entryMonth = (entry.entry_date || '').slice(0, 7);
+                return entryMonth && entryMonth < selectedMonth;
+            }
+
+            function shouldShowLedgerRow(entry, selectedMonth) {
+                if (!entry) return false;
+                if (isPendingLending(entry)) return true;
+                if (entry.type === LEDGER_TYPES.SALARY_PARTIAL) {
+                    return !!selectedMonth && getLedgerViewMonthKey(entry) === selectedMonth;
+                }
+                const viewMonth = getLedgerViewMonthKey(entry);
+                if (!selectedMonth) return !!viewMonth;
+                return viewMonth === selectedMonth;
+            }
+
+            function getLedgerSortPriority(entry) {
+                if (isPendingLending(entry)) return 0;
+                return 1;
+            }
+
+            function calculateFinancialLedgerTotals(entries, options = {}) {
+                const monthKey = options.monthKey || '';
+                const totals = {
+                    totalLending: 0,
+                    totalRecovery: 0,
+                    totalSalary: 0
+                };
+
+                (entries || []).forEach(entry => {
+                    if (monthKey && getLedgerMonthKey(entry) !== monthKey) return;
+                    const amount = parseFloat(entry.amount) || 0;
+                    if (entry.type === LEDGER_TYPES.LENDING) totals.totalLending += amount;
+                    if (entry.type === LEDGER_TYPES.RECOVERY) totals.totalRecovery += amount;
+                    if (entry.type === LEDGER_TYPES.SALARY_PARTIAL) totals.totalSalary += amount;
+                });
+
+                totals.netImpact = (totals.totalRecovery + totals.totalSalary) - totals.totalLending;
+                return totals;
+            }
+
+            function calculateNetBalanceWithLedger(options = {}) {
+                const monthKey = options.monthKey || '';
+                const filteredExpenses = monthKey ? expenses.filter(e => (e.date || '').startsWith(monthKey)) : expenses;
+                const filteredIncomes = monthKey ? incomes.filter(i => (i.date || '').startsWith(monthKey)) : incomes;
+                const totalExpense = filteredExpenses.reduce((sum, e) => sum + convertToUSD(e.amount, e.currency), 0);
+                const totalIncome = filteredIncomes.reduce((sum, i) => sum + convertToUSD(i.amount, i.currency), 0);
+                const ledgerTotals = calculateFinancialLedgerTotals(financialLedger, {
+                    monthKey
+                });
+
+                const netBalance = (totalIncome + ledgerTotals.totalSalary + ledgerTotals.totalRecovery) - (totalExpense + ledgerTotals.totalLending);
+                return {
+                    totalIncome,
+                    totalExpense,
+                    ...ledgerTotals,
+                    netBalance
+                };
             }
 
             function showMessage(message, type = 'info') {
@@ -4142,11 +4681,11 @@
                 doc.setTextColor(45, 55, 72);
                 doc.setFont(baseFont, 'normal');
                 doc.setFontSize(10);
-                doc.text(`Generated on: ${new Date().toLocaleString()}`, 32, 48);
-                doc.text(`Date range: ${dateRangeText}`, 32, 62);
+                doc.text(`Generated on: ${new Date().toLocaleString()}`, 36, 48);
+                doc.text(`Date range: ${dateRangeText}`, 36, 62);
                 // Khmer or English title
                 doc.setFont(hasKhmerText(titleText) ? khmerFont : baseFont, 'bold');
-                doc.text(titleText, pageWidth - 32, 48, {
+                doc.text(titleText, pageWidth - 36, 48, {
                     align: 'right'
                 });
 
@@ -4161,12 +4700,17 @@
 
             function formatKhr(amount) {
                 const val = Number(amount) || 0;
-                return `${val.toLocaleString('en-US', { maximumFractionDigits: 0 })} KHR`;
+                return `៛ ${val.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+            }
+
+            function formatKhrDisplay(amount) {
+                const val = Number(amount) || 0;
+                return `៛ ${Math.round(val).toLocaleString('en-US')}`;
             }
 
             function drawExecutiveSummary(doc, baseFont, startY, summary) {
                 const pageWidth = doc.internal.pageSize.getWidth();
-                const boxX = 24;
+                const boxX = 32;
                 const boxW = pageWidth - boxX * 2;
                 const userCount = Object.keys(summary.userTotals || {}).length;
                 const userRows = Math.ceil(userCount / 2);
@@ -4254,6 +4798,46 @@
                     doc.setTextColor(100, 100, 100);
                     doc.text(`(${formatKhr(totals.khr)})`, colX + 100, rowY);
                 });
+
+                return startY + boxH + 12;
+            }
+
+            function drawReportSummaryBox(doc, baseFont, startY, report) {
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const boxX = 32;
+                const boxW = pageWidth - boxX * 2;
+                const boxH = 94;
+                const incomeColor = [22, 163, 74];
+                const expenseColor = [220, 38, 38];
+                const netColor = report.totals.netCashFlow >= 0 ? [22, 163, 74] : [220, 38, 38];
+
+                doc.setFillColor(246, 248, 255);
+                doc.roundedRect(boxX, startY, boxW, boxH, 6, 6, 'F');
+                doc.setDrawColor(99, 102, 241);
+                doc.roundedRect(boxX, startY, boxW, boxH, 6, 6, 'S');
+
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(45, 55, 72);
+                doc.setFontSize(12);
+                doc.text('Report Summary', boxX + 12, startY + 18);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(75, 85, 99);
+                doc.text(`Range: ${report.range.label}`, boxX + 12, startY + 34);
+                doc.text(`Outstanding Debts: ${report.debts.length}`, boxX + 12, startY + 48);
+
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(incomeColor[0], incomeColor[1], incomeColor[2]);
+                doc.text(`Cash In: ${formatUSD(report.totals.totalCashIn)}`, boxX + boxW / 2 + 12, startY + 34);
+                doc.setTextColor(expenseColor[0], expenseColor[1], expenseColor[2]);
+                doc.text(`Cash Out: ${formatUSD(report.totals.totalCashOut)}`, boxX + boxW / 2 + 12, startY + 48);
+                doc.setTextColor(netColor[0], netColor[1], netColor[2]);
+                doc.text(`Net: ${formatUSD(report.totals.netCashFlow)}`, boxX + boxW / 2 + 12, startY + 62);
+
+                doc.setFont(khmerFontLoaded ? 'NotoSansKhmer' : baseFont, 'normal');
+                doc.setTextColor(100, 100, 100);
+                doc.text(`KHR: ${formatKhrDisplay(report.totals.totalCashIn)} / ${formatKhrDisplay(report.totals.totalCashOut)} / ${formatKhrDisplay(report.totals.netCashFlow)}`, boxX + 12, startY + 62);
 
                 return startY + boxH + 12;
             }
@@ -4700,6 +5284,195 @@
                 showMessage(`Successfully exported ${filteredData.length} transactions to PDF!`, 'success');
             }
 
+            function getFilteredLedgerRows() {
+                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
+                return [...financialLedger]
+                    .filter(item => shouldShowLedgerRow(item, monthKey))
+                    .sort((a, b) => {
+                        const priorityDiff = getLedgerSortPriority(a) - getLedgerSortPriority(b);
+                        if (priorityDiff !== 0) return priorityDiff;
+                        const da = (a.completed_date || a.entry_date || '');
+                        const dbDate = (b.completed_date || b.entry_date || '');
+                        if (da < dbDate) return 1;
+                        if (da > dbDate) return -1;
+                        return 0;
+                    });
+            }
+
+            function convertToLedgerCSV(data) {
+                const headers = [
+                    'Date', 'Type', 'Original Amount', 'Currency', 'Amount (USD)', 'Ref Month', 'Person Name', 'Status', 'Ledger ID'
+                ];
+                const rows = data.map(item => [
+                    `"${item.entry_date || ''}"`,
+                    `"${item.type || ''}"`,
+                    Number(item.original_amount || item.amount || 0).toFixed(2),
+                    `"${item.currency === 'KHR' ? 'KHR' : 'USD'}"`,
+                    Number(item.amount || 0).toFixed(2),
+                    `"${item.ref_month || ''}"`,
+                    `"${String(item.person_name || '').replace(/"/g, '""')}"`,
+                    `"${item.status || ''}"`,
+                    `"${item.id || ''}"`
+                ].join(','));
+
+                return [headers.join(','), ...rows].join('\n');
+            }
+
+            function exportLedgerToCSV() {
+                const rows = getFilteredLedgerRows();
+                if (!rows.length) {
+                    showMessage('No ledger data to export for selected month.', 'info');
+                    return;
+                }
+
+                const csvContent = convertToLedgerCSV(rows);
+                const blob = new Blob([csvContent], {
+                    type: 'text/csv;charset=utf-8;'
+                });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
+                link.setAttribute('href', url);
+                link.setAttribute('download', `theansou_ledger_${monthKey}_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage(`Successfully exported ${rows.length} ledger rows to CSV!`, 'success');
+            }
+
+            async function exportLedgerPDF() {
+                const rows = getFilteredLedgerRows();
+                if (!rows.length) {
+                    showMessage('No ledger data to export for selected month.', 'info');
+                    return;
+                }
+
+                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
+                const dateRangeText = `Reference month ${monthKey}`;
+                const pdfBase = await createStyledPdf('Financial Ledger', dateRangeText);
+                if (!pdfBase || !pdfBase.doc || !pdfBase.doc.autoTable) {
+                    showMessage('PDF table plugin failed to load.', 'error');
+                    return;
+                }
+
+                const {
+                    doc,
+                    baseFont
+                } = pdfBase;
+
+                const ledgerTotals = calculateFinancialLedgerTotals(rows, {
+                    monthKey
+                });
+                doc.setFont(baseFont, 'bold');
+                doc.setFontSize(10);
+                doc.setTextColor(45, 55, 72);
+                doc.text(`Lending: ${formatUsd(ledgerTotals.totalLending)}    Recovery: ${formatUsd(ledgerTotals.totalRecovery)}    Salary Partial: ${formatUsd(ledgerTotals.totalSalary)}    Net Effect: ${formatUsd(ledgerTotals.netImpact)}`, 24, pdfBase.cursorY);
+
+                const body = rows.map((item, index) => ({
+                    idx: index + 1,
+                    date: item.entry_date || '-',
+                    type: item.type || '-',
+                    originalAmount: item.currency === 'KHR' ?
+                        `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} ៛)` : `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} USD)`,
+                    amount: formatUsd(item.amount || 0),
+                    refMonth: item.ref_month || '-',
+                    person: normalizePdfText(item.person_name || '-'),
+                    status: item.status || 'pending'
+                }));
+
+                doc.autoTable({
+                    startY: pdfBase.cursorY + 12,
+                    columns: [{
+                        header: '#',
+                        dataKey: 'idx'
+                    }, {
+                        header: 'Date',
+                        dataKey: 'date'
+                    }, {
+                        header: 'Type',
+                        dataKey: 'type'
+                    }, {
+                        header: 'Original Amount',
+                        dataKey: 'originalAmount'
+                    }, {
+                        header: 'Amount (USD)',
+                        dataKey: 'amount'
+                    }, {
+                        header: 'Ref Month',
+                        dataKey: 'refMonth'
+                    }, {
+                        header: 'Person',
+                        dataKey: 'person'
+                    }, {
+                        header: 'Status',
+                        dataKey: 'status'
+                    }],
+                    body,
+                    styles: {
+                        font: baseFont,
+                        fontSize: 8,
+                        cellPadding: 4,
+                        overflow: 'linebreak'
+                    },
+                    headStyles: {
+                        fillColor: [99, 102, 241],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        fontSize: 8
+                    },
+                    alternateRowStyles: {
+                        fillColor: [248, 249, 252]
+                    },
+                    columnStyles: {
+                        idx: {
+                            cellWidth: 22,
+                            halign: 'center'
+                        },
+                        date: {
+                            cellWidth: 65
+                        },
+                        type: {
+                            cellWidth: 58
+                        },
+                        originalAmount: {
+                            cellWidth: 80,
+                            halign: 'right'
+                        },
+                        amount: {
+                            cellWidth: 60,
+                            halign: 'right'
+                        },
+                        refMonth: {
+                            cellWidth: 55
+                        },
+                        person: {
+                            cellWidth: 'auto',
+                            minCellWidth: 72
+                        },
+                        status: {
+                            cellWidth: 42
+                        }
+                    },
+                    margin: {
+                        left: 24,
+                        right: 24
+                    },
+                    tableWidth: 'auto',
+                    didParseCell: (data) => {
+                        if (khmerFontLoaded && data.cell && Array.isArray(data.cell.text) && data.cell.text.some(hasKhmerText)) {
+                            data.cell.styles.font = 'NotoSansKhmer';
+                            data.cell.styles.fontStyle = 'normal';
+                        }
+                    }
+                });
+
+                addPageNumbers(doc, baseFont);
+                const filename = `theansou_ledger_${monthKey}_${new Date().toISOString().split('T')[0]}.pdf`;
+                forcePdfDownload(doc, filename);
+                showMessage(`Successfully exported ${rows.length} ledger rows to PDF!`, 'success');
+            }
+
             // ---------------------------
             // CRUD (Firebase Firestore) 
             // ---------------------------
@@ -4739,6 +5512,482 @@
                     btn.classList.remove('btn-success-animate', 'btn-success-state');
                     btn.textContent = originalText;
                 }, 1500);
+            }
+
+            function toggleLedgerOptionalFields() {
+                const type = normalizeLedgerType(document.getElementById('ledger-type') ? document.getElementById('ledger-type').value : '');
+                const refMonthInput = document.getElementById('ledger-ref-month');
+                const personInput = document.getElementById('ledger-person-name');
+                if (!refMonthInput || !personInput) return;
+
+                refMonthInput.required = type === LEDGER_TYPES.SALARY_PARTIAL;
+                if (type === LEDGER_TYPES.SALARY_PARTIAL) {
+                    if (!refMonthInput.value) refMonthInput.value = getCurrentMonth();
+                    personInput.placeholder = 'Optional for salary partial';
+                } else {
+                    personInput.placeholder = 'Required for lending/recovery';
+                }
+            }
+
+            function updateLedgerConvertedAmountPreview() {
+                const amountInput = document.getElementById('ledger-amount');
+                const currencyInput = document.getElementById('ledger-currency');
+                const previewEl = document.getElementById('ledger-usd-preview');
+                if (!amountInput || !currencyInput || !previewEl) return;
+
+                const originalAmount = parseFloat(amountInput.value);
+                const currency = currencyInput.value === 'KHR' ? 'KHR' : 'USD';
+                if (!originalAmount || originalAmount <= 0) {
+                    previewEl.textContent = 'Equivalent USD: $0.00';
+                    return;
+                }
+
+                const convertedUsd = convertToUSD(originalAmount, currency);
+                if (currency === 'KHR') {
+                    previewEl.textContent = `Equivalent USD: ${formatUSD(convertedUsd)} (Rate: 1 USD = ${getExchangeRate().toLocaleString('en-US')} KHR)`;
+                } else {
+                    previewEl.textContent = `Equivalent USD: ${formatUSD(convertedUsd)}`;
+                }
+            }
+
+            function resetLedgerForm() {
+                const form = document.getElementById('ledger-form');
+                if (!form) return;
+                form.reset();
+                editingLedgerEntryId = null;
+                const entryDateInput = document.getElementById('ledger-entry-date');
+                const refMonthInput = document.getElementById('ledger-ref-month');
+                if (entryDateInput) entryDateInput.value = new Date().toISOString().split('T')[0];
+                if (refMonthInput) refMonthInput.value = getCurrentMonth();
+                const statusInput = document.getElementById('ledger-status');
+                if (statusInput) statusInput.value = 'pending';
+                const typeInput = document.getElementById('ledger-type');
+                if (typeInput) typeInput.value = LEDGER_TYPES.LENDING;
+                const currencyInput = document.getElementById('ledger-currency');
+                if (currencyInput) currencyInput.value = 'USD';
+                const submitBtn = document.getElementById('ledger-submit-button');
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Ledger Entry';
+                const cancelBtn = document.getElementById('ledger-cancel-edit-button');
+                if (cancelBtn) cancelBtn.classList.add('hidden');
+                const editingIndicator = document.getElementById('ledger-editing-indicator');
+                if (editingIndicator) editingIndicator.classList.add('hidden');
+                toggleLedgerOptionalFields();
+                updateLedgerConvertedAmountPreview();
+            }
+
+            function scrollToLedgerFormForEdit(focusElement) {
+                const form = document.getElementById('ledger-form');
+                if (!form) return;
+                const formPanel = form.closest('.glass-panel') || form;
+                const appContent = document.getElementById('app-content');
+                const appRoot = document.getElementById('app');
+                const headerOffset = 92;
+
+                // Try all known scroll containers on mobile layouts.
+                try {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                } catch (_) {}
+                try {
+                    if (appRoot) appRoot.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                } catch (_) {}
+                try {
+                    if (appContent) appContent.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                } catch (_) {}
+
+                try {
+                    formPanel.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
+                        inline: 'nearest'
+                    });
+                } catch (_) {}
+
+                setTimeout(() => {
+                    const rect = formPanel.getBoundingClientRect();
+                    try {
+                        const winTop = Math.max(0, window.scrollY + rect.top - headerOffset);
+                        window.scrollTo({
+                            top: winTop,
+                            behavior: 'smooth'
+                        });
+                    } catch (_) {}
+
+                    if (appContent) {
+                        try {
+                            const appRect = appContent.getBoundingClientRect();
+                            const targetTop = Math.max(0, appContent.scrollTop + rect.top - appRect.top - headerOffset);
+                            appContent.scrollTo({
+                                top: targetTop,
+                                behavior: 'smooth'
+                            });
+                        } catch (_) {}
+                    }
+
+                    if (focusElement) {
+                        try {
+                            focusElement.focus({
+                                preventScroll: true
+                            });
+                        } catch (_) {
+                            focusElement.focus();
+                        }
+                    }
+                }, 240);
+            }
+
+            function editFinancialLedgerEntry(id) {
+                const entry = financialLedger.find(item => item.id === id);
+                if (!entry) {
+                    showMessage('Ledger entry not found.', 'error');
+                    return;
+                }
+
+                editingLedgerEntryId = id;
+                if (typeof switchTab === 'function') {
+                    switchTab('ledger');
+                }
+                const typeInput = document.getElementById('ledger-type');
+                const amountInput = document.getElementById('ledger-amount');
+                const currencyInput = document.getElementById('ledger-currency');
+                const refMonthInput = document.getElementById('ledger-ref-month');
+                const personInput = document.getElementById('ledger-person-name');
+                const noteInput = document.getElementById('ledger-contact-note');
+                const statusInput = document.getElementById('ledger-status');
+                const dateInput = document.getElementById('ledger-entry-date');
+                const submitBtn = document.getElementById('ledger-submit-button');
+                const cancelBtn = document.getElementById('ledger-cancel-edit-button');
+                const editingIndicator = document.getElementById('ledger-editing-indicator');
+
+                if (typeInput) typeInput.value = normalizeLedgerType(entry.type) || LEDGER_TYPES.LENDING;
+                if (amountInput) amountInput.value = String(parseFloat(entry.original_amount || entry.amount || 0) || 0);
+                if (currencyInput) currencyInput.value = entry.currency === 'KHR' ? 'KHR' : 'USD';
+                if (refMonthInput) refMonthInput.value = entry.ref_month || getCurrentMonth();
+                if (personInput) personInput.value = entry.person_name || '';
+                if (noteInput) noteInput.value = entry.contact_note || '';
+                if (statusInput) statusInput.value = entry.status === 'completed' ? 'completed' : 'pending';
+                if (dateInput) dateInput.value = entry.entry_date || new Date().toISOString().split('T')[0];
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-pen"></i> Update Ledger Entry';
+                if (cancelBtn) cancelBtn.classList.remove('hidden');
+                if (editingIndicator) {
+                    const personText = (entry.person_name || entry.type || 'entry').toString();
+                    editingIndicator.textContent = `Editing: ${personText}`;
+                    editingIndicator.classList.remove('hidden');
+                }
+
+                toggleLedgerOptionalFields();
+                updateLedgerConvertedAmountPreview();
+                const form = document.getElementById('ledger-form');
+                if (form) form.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+                scrollToLedgerFormForEdit(amountInput);
+            }
+
+            async function saveFinancialLedgerEntry(ledgerData) {
+                if (!db) return showMessage('Database not connected.', 'error');
+                if (!currentUser) return showMessage('You must sign in first.', 'error');
+
+                const type = normalizeLedgerType(ledgerData.type);
+                const originalAmount = parseFloat(ledgerData.amount);
+                const currency = ledgerData.currency === 'KHR' ? 'KHR' : 'USD';
+                const amount = convertToUSD(originalAmount, currency);
+                const status = ledgerData.status === 'completed' ? 'completed' : 'pending';
+                const personName = normalizeCategoryName(ledgerData.person_name || '');
+                const contactNote = String(ledgerData.contact_note || '').trim();
+                const entryDate = ledgerData.entry_date || new Date().toISOString().split('T')[0];
+                const refMonth = (ledgerData.ref_month || '').trim();
+
+                if (!type) return showMessage('Invalid ledger type.', 'error');
+                if (!originalAmount || originalAmount <= 0) return showMessage('Amount must be greater than zero.', 'error');
+                if (!amount || amount <= 0) return showMessage('Converted USD amount must be greater than zero.', 'error');
+                if (!entryDate) return showMessage('Entry date is required.', 'error');
+                if (type === LEDGER_TYPES.SALARY_PARTIAL && !refMonth) return showMessage('Ref month is required for salary partial.', 'error');
+                if ((type === LEDGER_TYPES.LENDING || type === LEDGER_TYPES.RECOVERY) && !personName) {
+                    return showMessage('Person name is required for lending/recovery.', 'error');
+                }
+
+                const submitBtn = document.getElementById('ledger-submit-button');
+                const isUpdate = !!ledgerData.id;
+                const originalText = submitBtn ? submitBtn.textContent : (isUpdate ? 'Update Ledger Entry' : 'Save Ledger Entry');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${isUpdate ? 'Updating...' : 'Saving...'} `;
+                }
+
+                const dataToSave = {
+                    type,
+                    amount,
+                    currency,
+                    original_amount: originalAmount,
+                    ref_month: refMonth || '',
+                    person_name: personName,
+                    contact_note: contactNote,
+                    status,
+                    entry_date: entryDate,
+                    completed_date: status === 'completed' ? entryDate : '',
+                    userId: currentUser.uid,
+                    userEmail: (currentUser.email || '').toLowerCase(),
+                    groupId: getActiveGroupId(),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                try {
+                    if (isUpdate) {
+                        await db.collection('financial_ledger').doc(ledgerData.id).update({
+                            ...dataToSave,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } else {
+                        await db.collection('financial_ledger').add(dataToSave);
+                    }
+                    if (submitBtn) submitBtn.disabled = false;
+                    showSaveToast(isUpdate ? 'Ledger entry updated!' : 'Ledger entry saved!');
+                    animateButtonSuccess('ledger-submit-button', isUpdate ? 'Update Ledger Entry' : 'Save Ledger Entry');
+                    resetLedgerForm();
+                } catch (err) {
+                    console.error('Firestore save ledger error:', err);
+                    showMessage('Error: ' + err.message, 'error');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                }
+            }
+
+            async function toggleFinancialLedgerStatus(id, status) {
+                if (!db || !id) return;
+                try {
+                    const existing = financialLedger.find(item => item.id === id);
+                    if (!existing) return;
+                    const existingCurrency = existing.currency === 'KHR' ? 'KHR' : 'USD';
+                    const existingOriginalAmount = parseFloat(existing.original_amount);
+                    const completedDate = status === 'completed' ?
+                        (existing.completed_date || new Date().toISOString().split('T')[0]) :
+                        (existing.completed_date || '');
+                    await db.collection('financial_ledger').doc(id).update({
+                        type: existing.type,
+                        amount: parseFloat(existing.amount) || 0,
+                        currency: existingCurrency,
+                        original_amount: Number.isFinite(existingOriginalAmount) && existingOriginalAmount > 0 ? existingOriginalAmount : (parseFloat(existing.amount) || 0),
+                        ref_month: existing.ref_month || '',
+                        person_name: existing.person_name || '',
+                        contact_note: existing.contact_note || '',
+                        entry_date: existing.entry_date || new Date().toISOString().split('T')[0],
+                        completed_date: completedDate,
+                        userId: existing.userId || currentUser.uid,
+                        userEmail: existing.userEmail || (currentUser && currentUser.email ? currentUser.email.toLowerCase() : ''),
+                        groupId: existing.groupId || getActiveGroupId(),
+                        status: status === 'completed' ? 'completed' : 'pending'
+                    });
+                } catch (err) {
+                    console.error('Update ledger status error:', err);
+                    showMessage('Error: ' + err.message, 'error');
+                }
+            }
+
+            async function deleteFinancialLedgerEntry(id) {
+                if (!db || !id) return;
+                try {
+                    const existing = financialLedger.find(item => item.id === id);
+                    const personLabel = existing ? (existing.person_name || existing.type || 'this entry') : 'this entry';
+                    if (!window.confirm(`Delete ledger entry for ${personLabel}?`)) return;
+                    await db.collection('financial_ledger').doc(id).delete();
+                    showMessage('Ledger entry deleted.', 'success');
+                } catch (err) {
+                    console.error('Delete ledger error:', err);
+                    showMessage('Error: ' + err.message, 'error');
+                }
+            }
+
+            function renderLedgerSection() {
+                const tableBody = document.getElementById('ledger-table-body');
+                const emptyState = document.getElementById('ledger-empty-state');
+                const mobileCardsContainer = document.getElementById('ledger-mobile-cards');
+                if (!tableBody || !emptyState || !mobileCardsContainer) return;
+
+                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
+                const filterDropdown = document.getElementById('ledger-view-filter');
+                const filterMode = filterDropdown ? filterDropdown.value : 'selected-month';
+
+                const monthTotals = calculateFinancialLedgerTotals(financialLedger, {
+                    monthKey
+                });
+
+                const totalLendingEl = document.getElementById('ledger-total-lending');
+                const totalRecoveryEl = document.getElementById('ledger-total-recovery');
+                const totalSalaryEl = document.getElementById('ledger-total-salary');
+                const netImpactEl = document.getElementById('ledger-net-impact');
+                if (totalLendingEl) totalLendingEl.textContent = formatUSD(monthTotals.totalLending);
+                if (totalRecoveryEl) totalRecoveryEl.textContent = formatUSD(monthTotals.totalRecovery);
+                if (totalSalaryEl) totalSalaryEl.textContent = formatUSD(monthTotals.totalSalary);
+                if (netImpactEl) {
+                    netImpactEl.textContent = formatUSD(monthTotals.netImpact);
+                    netImpactEl.className = `text-lg font-bold ${monthTotals.netImpact >= 0 ? 'text-emerald-700' : 'text-red-700'}`;
+                }
+
+                // Filter rows based on filter mode
+                let filteredLedger = [...financialLedger];
+                if (filterMode === 'selected-month') {
+                    filteredLedger = filteredLedger.filter(item => shouldShowLedgerRow(item, monthKey));
+                } else if (filterMode === 'all-pending') {
+                    filteredLedger = filteredLedger.filter(item => item.type === LEDGER_TYPES.LENDING && item.status === 'pending');
+                }
+                // 'all-months' shows all items
+
+                const rows = filteredLedger.sort((a, b) => {
+                    const priorityDiff = getLedgerSortPriority(a) - getLedgerSortPriority(b);
+                    if (priorityDiff !== 0) return priorityDiff;
+                    const aDate = (a.completed_date || a.entry_date || '');
+                    const bDate = (b.completed_date || b.entry_date || '');
+                    if (aDate < bDate) return 1;
+                    if (aDate > bDate) return -1;
+                    return 0;
+                });
+
+                if (rows.length === 0) {
+                    tableBody.innerHTML = '';
+                    mobileCardsContainer.innerHTML = '';
+                    let emptyMessage = 'មិនមានទិន្នន័យសម្រាប់ខែនេះទេ';
+                    if (filterMode === 'all-months') {
+                        emptyMessage = 'មិនមានទិន្នន័យប្រតិបត្តិការនៅឡើយទេ';
+                    } else if (filterMode === 'all-pending') {
+                        emptyMessage = 'មិនមានបំណុល pending ទេ';
+                    }
+                    emptyState.innerHTML = `<i class="fas fa-book-open text-4xl mb-2 opacity-50"></i><p>${emptyMessage}</p>`;
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    tableBody.innerHTML = rows.map(item => {
+                        const typeColor = item.type === LEDGER_TYPES.LENDING ? 'text-red-600' : (item.type === LEDGER_TYPES.RECOVERY ? 'text-green-600' : 'text-blue-600');
+                        const displayCurrency = item.currency === 'KHR' ? 'KHR' : 'USD';
+                        const displayOriginalAmount = Number(item.original_amount || item.amount || 0);
+                        const carryOver = filterMode === 'selected-month' ? isCarryOverPendingLending(item, monthKey) : false;
+                        const typeRowClass = item.type === LEDGER_TYPES.LENDING ? 'ledger-row-lending' : (item.type === LEDGER_TYPES.RECOVERY ? 'ledger-row-recovery' : 'ledger-row-salary');
+                        const rowClass = `${typeRowClass} ${carryOver ? 'border-b border-yellow-200 bg-yellow-50/70 ledger-row-carry' : 'border-b border-gray-100'}`;
+                        const statusBadge = carryOver ? '<span class="ml-2 inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-bold text-yellow-800">Carry Over</span>' : '';
+                        const amountDisplay = displayCurrency === 'KHR' ? `៛ ${displayOriginalAmount.toLocaleString()} (${formatUSD(item.amount || 0)})` : formatUSD(item.amount || 0);
+                        return `
+                        <tr class="${rowClass}">
+                            <td class="py-2 pr-3 text-gray-700">${item.entry_date || '-'}</td>
+                            <td class="py-2 pr-3 font-semibold ${typeColor}">${item.type || '-'}${statusBadge}</td>
+                            <td class="py-2 pr-3 font-bold text-gray-800">${amountDisplay}</td>
+                            <td class="py-2 pr-3 text-gray-600 text-xs">${item.contact_note ? normalizePdfText(item.contact_note) : '-'}</td>
+                            <td class="py-2 pr-3 text-gray-600">${item.ref_month || '-'}</td>
+                            <td class="py-2 pr-3 text-gray-600">${item.person_name || '-'}</td>
+                            <td class="py-2 pr-3">
+                                <select class="glass-input rounded-lg text-xs ledger-status-select" onchange="toggleFinancialLedgerStatus('${item.id}', this.value)">
+                                    <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>pending</option>
+                                    <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>completed</option>
+                                </select>
+                            </td>
+                            <td class="py-2 text-right">
+                                <div class="ledger-row-actions inline-flex items-center gap-2">
+                                    <button class="ledger-action-btn ledger-action-btn-edit" onclick="editFinancialLedgerEntry('${item.id}')">Edit</button>
+                                    <button class="ledger-action-btn ledger-action-btn-delete" onclick="deleteFinancialLedgerEntry('${item.id}')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }).join('');
+
+                    mobileCardsContainer.innerHTML = rows.map(item => {
+                        const typeColor = item.type === LEDGER_TYPES.LENDING ? 'text-red-600' : (item.type === LEDGER_TYPES.RECOVERY ? 'text-green-600' : 'text-blue-600');
+                        const displayCurrency = item.currency === 'KHR' ? 'KHR' : 'USD';
+                        const displayOriginalAmount = Number(item.original_amount || item.amount || 0);
+                        const carryOver = filterMode === 'selected-month' ? isCarryOverPendingLending(item, monthKey) : false;
+                        const carryBadge = carryOver ? '<span class="ledger-mobile-badge">Carry Over</span>' : '';
+                        const amountDisplay = displayCurrency === 'KHR' ? `៛ ${displayOriginalAmount.toLocaleString()} (${formatUSD(item.amount || 0)})` : formatUSD(item.amount || 0);
+                        const contactNote = item.contact_note ? normalizePdfText(item.contact_note) : '-';
+                        return `
+                        <article class="ledger-mobile-card ${carryOver ? 'ledger-mobile-card-carry' : ''}">
+                            <div class="ledger-mobile-card-head">
+                                <div class="font-bold ${typeColor}">${item.type || '-'}</div>
+                                <div class="text-xs text-gray-500">${item.entry_date || '-'}</div>
+                            </div>
+                            <div class="ledger-mobile-amount">${amountDisplay}</div>
+                            <div class="ledger-mobile-meta">
+                                <span><strong>Status:</strong> ${item.status || '-'}</span>
+                                <span><strong>Person:</strong> ${item.person_name || '-'}</span>
+                                <span><strong>Ref:</strong> ${item.ref_month || '-'}</span>
+                                <span><strong>Note:</strong> ${contactNote}</span>
+                            </div>
+                            <div class="ledger-mobile-actions">
+                                ${carryBadge}
+                                <select class="glass-input rounded-lg text-xs ledger-status-select" onchange="toggleFinancialLedgerStatus('${item.id}', this.value)">
+                                    <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>pending</option>
+                                    <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>completed</option>
+                                </select>
+                                <button class="ledger-action-btn ledger-action-btn-edit" onclick="editFinancialLedgerEntry('${item.id}')">Edit</button>
+                                <button class="ledger-action-btn ledger-action-btn-delete" onclick="deleteFinancialLedgerEntry('${item.id}')">Delete</button>
+                            </div>
+                        </article>`;
+                    }).join('');
+                }
+
+                // Update progress bar with dual-currency
+                const targetDisplay = getSalaryTargetDisplay(monthKey);
+                const received = monthTotals.totalSalary;
+                const percent = targetDisplay.usd > 0 ? Math.min(100, (received / targetDisplay.usd) * 100) : 0;
+
+                const progressText = document.getElementById('ledger-progress-text');
+                const progressPercent = document.getElementById('ledger-progress-percent');
+                const progressBar = document.getElementById('ledger-progress-bar');
+                const targetInput = document.getElementById('ledger-salary-target');
+                const currencySelect = document.getElementById('ledger-salary-target-currency');
+
+                let progressLabel = `Progress: ${formatUSD(received)} / `;
+                if (targetDisplay.currency === 'KHR') {
+                    progressLabel += `៛ ${targetDisplay.original.toLocaleString()} (~${formatUSD(targetDisplay.usd)})`;
+                } else {
+                    progressLabel += formatUSD(targetDisplay.usd);
+                }
+
+                if (progressText) progressText.textContent = progressLabel;
+                if (progressPercent) progressPercent.textContent = `${percent.toFixed(1)}%`;
+                if (progressBar) progressBar.style.width = `${percent}%`;
+
+                if (targetInput && document.activeElement !== targetInput) {
+                    targetInput.value = targetDisplay.original > 0 ? String(targetDisplay.original) : '';
+                }
+                if (currencySelect && currencySelect.value !== targetDisplay.currency) {
+                    currencySelect.value = targetDisplay.currency;
+                }
+            }
+
+            function saveCurrentMonthSalaryTarget() {
+                const monthInput = document.getElementById('ledger-month-focus');
+                const targetInput = document.getElementById('ledger-salary-target');
+                const currencySelect = document.getElementById('ledger-salary-target-currency');
+                if (!monthInput || !targetInput || !currencySelect) return;
+
+                const monthKey = monthInput.value || getCurrentMonth();
+                const amount = parseFloat(targetInput.value) || 0;
+                const currency = currencySelect.value || 'USD';
+
+                const targetUsd = currency === 'KHR' ? convertToUSD(amount, 'KHR') : amount;
+                const confirmMsg = currency === 'KHR' ?
+                    `Save salary target ៛ ${amount.toLocaleString()} (~${formatUSD(targetUsd)}) for ${monthKey}?` :
+                    `Save salary target ${formatUSD(amount)} for ${monthKey}?`;
+
+                if (!window.confirm(confirmMsg)) return;
+
+                salaryTargetsByMonth[monthKey] = {
+                    amount: amount,
+                    currency: currency,
+                    timestamp: new Date().toISOString()
+                };
+                saveSalaryTargets();
+                renderLedgerSection();
+                showMessage('Salary target saved.', 'success');
             }
 
             async function saveExpense(expenseData) {
@@ -6403,7 +7652,15 @@
             function getUniqueMonths(data) {
                 const monthKeys = new Set();
                 data.forEach(e => {
-                    monthKeys.add(e.date.substring(0, 7));
+                    if (e && typeof e.date === 'string' && e.date.length >= 7) {
+                        monthKeys.add(e.date.substring(0, 7));
+                    }
+                    if (e && typeof e.ref_month === 'string' && e.ref_month.length >= 7) {
+                        monthKeys.add(e.ref_month.substring(0, 7));
+                    }
+                    if (e && typeof e.entry_date === 'string' && e.entry_date.length >= 7) {
+                        monthKeys.add(e.entry_date.substring(0, 7));
+                    }
                 });
                 return Array.from(monthKeys).sort().reverse();
             }
@@ -6448,9 +7705,13 @@
                     return;
                 }
                 const expensesInMonth = expenses.filter(e => e.date.startsWith(monthKey));
+                const incomesInMonth = incomes.filter(i => i.date.startsWith(monthKey));
+                const ledgerMonthTotals = calculateFinancialLedgerTotals(financialLedger, {
+                    monthKey
+                });
 
-                if (expensesInMonth.length === 0) {
-                    container.innerHTML = `<p class="text-gray-500">No expenses recorded for the selected month.</p>`;
+                if (expensesInMonth.length === 0 && incomesInMonth.length === 0 && ledgerMonthTotals.totalSalary === 0 && ledgerMonthTotals.totalRecovery === 0 && ledgerMonthTotals.totalLending === 0) {
+                    container.innerHTML = `<p class="text-gray-500">No transactions recorded for the selected month.</p>`;
                     if (monthPieChart) monthPieChart.destroy();
                     if (monthLineChart) monthLineChart.destroy();
                     return;
@@ -6462,13 +7723,11 @@
                 const monthDailyTrend = {};
                 let totalMonthExpense = 0;
 
-                const incomesInMonth = incomes.filter(i => i.date.startsWith(monthKey));
-                const currentMonth = new Date().toISOString().slice(0, 7);
-                const currentMonthIncomes = incomes.filter(i => i.date.startsWith(currentMonth));
                 let totalMonthIncome = 0;
-                currentMonthIncomes.forEach(i => {
+                incomesInMonth.forEach(i => {
                     totalMonthIncome += convertToUSD(i.amount, i.currency);
                 });
+                const netMonthBalance = (totalMonthIncome + ledgerMonthTotals.totalSalary + ledgerMonthTotals.totalRecovery) - (totalMonthExpense + ledgerMonthTotals.totalLending);
 
                 expensesInMonth.forEach(e => {
                     const usd = convertToUSD(e.amount, e.currency);
@@ -6509,8 +7768,13 @@
                     <p class="text-lg font-medium text-gray-800 mt-2">
                         Total Income for selected month: <span class="text-green-600 font-bold text-2xl ml-2">${formatUSD(totalMonthIncome)}</span>
                     </p>
+                    <p class="text-sm font-medium text-gray-700 mt-2">
+                        Salary Partial: <span class="text-blue-600 font-bold ml-1">${formatUSD(ledgerMonthTotals.totalSalary)}</span> |
+                        Recovery: <span class="text-green-600 font-bold ml-1">${formatUSD(ledgerMonthTotals.totalRecovery)}</span> |
+                        Lending: <span class="text-red-600 font-bold ml-1">${formatUSD(ledgerMonthTotals.totalLending)}</span>
+                    </p>
                     <p class="text-lg font-medium text-gray-800 mt-2">
-                        Net Balance for selected month: <span class="text-blue-600 font-bold text-2xl ml-2">${formatUSD(totalMonthIncome - totalMonthExpense)}</span>
+                        Net Balance for selected month: <span class="text-blue-600 font-bold text-2xl ml-2">${formatUSD(netMonthBalance)}</span>
                     </p>
                 </div>
 
@@ -6672,6 +7936,523 @@
                 }
             }
 
+            function getReportRangeConfig() {
+                const modeEl = document.getElementById('report-range-mode');
+                const monthEl = document.getElementById('report-range-month');
+                const yearEl = document.getElementById('report-range-year');
+                const startEl = document.getElementById('report-range-start');
+                const endEl = document.getElementById('report-range-end');
+                const mode = modeEl ? modeEl.value : 'month';
+                const currentMonthKey = new Date().toISOString().slice(0, 7);
+                const currentYear = new Date().getFullYear();
+
+                if (mode === 'year') {
+                    const year = String(parseInt(yearEl && yearEl.value ? yearEl.value : currentYear, 10) || currentYear);
+                    return {
+                        mode,
+                        year,
+                        monthKey: `${year}-01`,
+                        startDate: `${year}-01-01`,
+                        endDate: `${year}-12-31`,
+                        label: `Annual Report - ${year}`
+                    };
+                }
+
+                if (mode === 'custom') {
+                    const startDate = startEl ? startEl.value : '';
+                    const endDate = endEl ? endEl.value : '';
+                    return {
+                        mode,
+                        startDate,
+                        endDate,
+                        label: startDate && endDate ? `Custom Report - ${startDate} to ${endDate}` : 'Custom Report'
+                    };
+                }
+
+                const monthKey = monthEl && monthEl.value ? monthEl.value : currentMonthKey;
+                const [year, month] = monthKey.split('-');
+                const lastDay = new Date(parseInt(year, 10), parseInt(month, 10), 0).getDate();
+                return {
+                    mode: 'month',
+                    monthKey,
+                    startDate: `${monthKey}-01`,
+                    endDate: `${monthKey}-${String(lastDay).padStart(2, '0')}`,
+                    label: `Monthly Report - ${new Date(`${monthKey}-01`).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
+                };
+            }
+
+            function isDateWithinRange(dateValue, startDate, endDate) {
+                if (!dateValue) return false;
+                if (startDate && dateValue < startDate) return false;
+                if (endDate && dateValue > endDate) return false;
+                return true;
+            }
+
+            function getLedgerReportDate(entry) {
+                if (!entry) return '';
+                if (entry.type === LEDGER_TYPES.SALARY_PARTIAL) {
+                    return entry.ref_month ? `${entry.ref_month}-01` : (entry.completed_date || entry.entry_date || '');
+                }
+                if (entry.status === 'completed' && entry.completed_date) {
+                    return entry.completed_date;
+                }
+                return entry.entry_date || '';
+            }
+
+            function formatKhrEquivalent(amount) {
+                const rate = getExchangeRate();
+                const khrValue = (Number(amount) || 0) * rate;
+                return `${Math.round(khrValue).toLocaleString('en-US')} ៛`;
+            }
+
+            function getExpenseCategorySummary(rows) {
+                const totals = {};
+                rows.forEach(row => {
+                    if (row.collection !== 'expenses') return;
+                    const category = row.description || 'Uncategorized';
+                    totals[category] = (totals[category] || 0) + (Number(row.amount) || 0);
+                });
+                return Object.entries(totals)
+                    .map(([category, amount]) => ({ category, amount }))
+                    .sort((a, b) => b.amount - a.amount);
+            }
+
+            function getConsolidatedReportRows(range) {
+                const rows = [];
+                (expenses || []).forEach(expense => {
+                    if (!isDateWithinRange(expense.date || '', range.startDate, range.endDate)) return;
+                    rows.push({
+                        collection: 'expenses',
+                        type: 'expense',
+                        date: expense.date || '',
+                        description: expense.category || '',
+                        user: expense.user || 'Self',
+                        original_amount: Number(expense.amount || 0),
+                        currency: expense.currency === 'KHR' ? 'KHR' : 'USD',
+                        amount: convertToUSD(expense.amount, expense.currency),
+                        ref_month: '',
+                        person_name: '',
+                        status: '',
+                        id: expense.id || ''
+                    });
+                });
+
+                (incomes || []).forEach(income => {
+                    if (!isDateWithinRange(income.date || '', range.startDate, range.endDate)) return;
+                    rows.push({
+                        collection: 'incomes',
+                        type: 'income',
+                        date: income.date || '',
+                        description: income.source || '',
+                        user: income.user || 'Self',
+                        original_amount: Number(income.amount || 0),
+                        currency: income.currency === 'KHR' ? 'KHR' : 'USD',
+                        amount: convertToUSD(income.amount, income.currency),
+                        ref_month: '',
+                        person_name: '',
+                        status: '',
+                        id: income.id || ''
+                    });
+                });
+
+                (financialLedger || []).forEach(entry => {
+                    const reportDate = getLedgerReportDate(entry);
+                    if (!isDateWithinRange(reportDate, range.startDate, range.endDate)) return;
+                    rows.push({
+                        collection: 'financial_ledger',
+                        type: 'ledger',
+                        ledger_type: entry.type || '',
+                        date: reportDate || entry.entry_date || '',
+                        description: entry.type === LEDGER_TYPES.SALARY_PARTIAL ? 'Salary Partial' : (entry.person_name || entry.type || ''),
+                        user: entry.userEmail || '',
+                        original_amount: Number(entry.original_amount || entry.amount || 0),
+                        currency: entry.currency === 'KHR' ? 'KHR' : 'USD',
+                        amount: Number(entry.amount || 0),
+                        ref_month: entry.ref_month || '',
+                        person_name: entry.person_name || '',
+                        contact_note: entry.contact_note || '',
+                        status: entry.status || 'pending',
+                        entry_date: entry.entry_date || '',
+                        completed_date: entry.completed_date || '',
+                        id: entry.id || ''
+                    });
+                });
+
+                rows.sort((a, b) => {
+                    if (a.date < b.date) return 1;
+                    if (a.date > b.date) return -1;
+                    return a.type.localeCompare(b.type);
+                });
+
+                return rows;
+            }
+
+            function calculateOutstandingDebtsSummary(range) {
+                const cutoffDate = range.endDate || new Date().toISOString().split('T')[0];
+                const debtMap = new Map();
+                const cutoffTime = new Date(`${cutoffDate}T23:59:59`).getTime();
+
+                (financialLedger || []).forEach(entry => {
+                    if (entry.type !== LEDGER_TYPES.LENDING || entry.status !== 'pending') return;
+                    const entryDate = entry.entry_date || '';
+                    if (entryDate && entryDate > cutoffDate) return;
+                    const person = entry.person_name || 'Unknown';
+                    const amount = Number(entry.amount || 0);
+                    const note = String(entry.contact_note || '').trim();
+                    const current = debtMap.get(person) || {
+                        person,
+                        count: 0,
+                        amount: 0,
+                        oldestDate: entryDate,
+                        latestDate: entryDate,
+                        contactNote: note,
+                        ageDays: 0
+                    };
+                    current.count += 1;
+                    current.amount += amount;
+                    if (!current.oldestDate || (entryDate && entryDate < current.oldestDate)) current.oldestDate = entryDate;
+                    if (!current.latestDate || (entryDate && entryDate > current.latestDate)) current.latestDate = entryDate;
+                    if (!current.contactNote && note) current.contactNote = note;
+                    if (current.oldestDate) {
+                        const oldestTime = new Date(`${current.oldestDate}T00:00:00`).getTime();
+                        current.ageDays = Math.max(0, Math.floor((cutoffTime - oldestTime) / (1000 * 60 * 60 * 24)));
+                    }
+                    debtMap.set(person, current);
+                });
+
+                return Array.from(debtMap.values()).sort((a, b) => b.amount - a.amount);
+            }
+
+            function renderReportAggregation() {
+                const range = getReportRangeConfig();
+                const reportLabelEl = document.getElementById('report-range-label');
+                const rangeModeEl = document.getElementById('report-range-mode');
+                const totalCashInEl = document.getElementById('report-total-cash-in');
+                const totalCashOutEl = document.getElementById('report-total-cash-out');
+                const netCashFlowEl = document.getElementById('report-net-cash-flow');
+                const debtCaptionEl = document.getElementById('report-debt-summary-caption');
+                const debtCountEl = document.getElementById('report-debt-count');
+                const debtTableBody = document.getElementById('report-debt-table-body');
+                const debtCardsEl = document.getElementById('report-debt-cards');
+
+                if (reportLabelEl) reportLabelEl.textContent = range.label;
+
+                const cashRangeRows = getConsolidatedReportRows(range);
+                const totalExpenses = cashRangeRows.filter(row => row.type === 'expense').reduce((sum, row) => sum + row.amount, 0);
+                const totalIncomes = cashRangeRows.filter(row => row.type === 'income').reduce((sum, row) => sum + row.amount, 0);
+                const totalSalary = cashRangeRows.filter(row => row.collection === 'financial_ledger' && row.ledger_type === LEDGER_TYPES.SALARY_PARTIAL).reduce((sum, row) => sum + row.amount, 0);
+                const totalRecovery = cashRangeRows.filter(row => row.collection === 'financial_ledger' && row.ledger_type === LEDGER_TYPES.RECOVERY).reduce((sum, row) => sum + row.amount, 0);
+                const totalLending = cashRangeRows.filter(row => row.collection === 'financial_ledger' && row.ledger_type === LEDGER_TYPES.LENDING).reduce((sum, row) => sum + row.amount, 0);
+                const totalCashIn = totalIncomes + totalSalary + totalRecovery;
+                const totalCashOut = totalExpenses + totalLending;
+                const netCashFlow = totalCashIn - totalCashOut;
+
+                if (totalCashInEl) totalCashInEl.textContent = formatUSD(totalCashIn);
+                if (totalCashOutEl) totalCashOutEl.textContent = formatUSD(totalCashOut);
+                if (netCashFlowEl) {
+                    netCashFlowEl.textContent = formatUSD(netCashFlow);
+                    netCashFlowEl.className = `stat-value ${netCashFlow >= 0 ? 'text-green-600' : 'text-red-600'}`;
+                }
+
+                const debts = calculateOutstandingDebtsSummary(range);
+                if (debtCaptionEl) {
+                    debtCaptionEl.textContent = range.mode === 'year'
+                        ? `Pending lending items as of ${range.endDate}.`
+                        : `Pending lending items as of the selected report end date.`;
+                }
+                if (debtCountEl) debtCountEl.textContent = String(debts.length);
+
+                if (debtTableBody) {
+                    if (!debts.length) {
+                        debtTableBody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-gray-500">No outstanding debts found in the selected range.</td></tr>';
+                        if (debtCardsEl) {
+                            debtCardsEl.innerHTML = '<div class="report-debt-empty text-center py-6 text-gray-500">No outstanding debts found in the selected range.</div>';
+                        }
+                    } else {
+                        debtTableBody.innerHTML = debts.map(item => `
+                            <tr class="border-b border-gray-100 ${item.ageDays > 30 ? 'text-red-700 bg-red-50/60' : ''}">
+                                <td class="py-2 pr-3 font-semibold ${item.ageDays > 30 ? 'text-red-700' : 'text-gray-800'}">${item.person}</td>
+                                <td class="py-2 pr-3 ${item.ageDays > 30 ? 'text-red-700' : 'text-gray-600'}">${item.count}</td>
+                                <td class="py-2 pr-3 font-bold ${item.ageDays > 30 ? 'text-red-700' : 'text-red-600'}">${formatUSD(item.amount)}</td>
+                                <td class="py-2 pr-3 ${item.ageDays > 30 ? 'text-red-700' : 'text-gray-600'}">${item.oldestDate || '-'}</td>
+                                <td class="py-2 pr-3 ${item.ageDays > 30 ? 'text-red-700' : 'text-gray-600'}">${item.latestDate || '-'}</td>
+                                <td class="py-2 pr-3 ${item.ageDays > 30 ? 'text-red-700' : 'text-gray-600'}">${normalizePdfText(item.contactNote || '-')}</td>
+                            </tr>
+                        `).join('');
+
+                        if (debtCardsEl) {
+                            debtCardsEl.innerHTML = debts.map(item => {
+                                const isOverdue = item.ageDays > 30;
+                                return `
+                                <article class="report-debt-card ${isOverdue ? 'report-debt-card-overdue' : ''}">
+                                    <div class="report-debt-card-head">
+                                        <h4 class="font-bold ${isOverdue ? 'text-red-700' : 'text-gray-800'}">${item.person}</h4>
+                                        <span class="report-debt-count-pill">${item.count} entries</span>
+                                    </div>
+                                    <div class="report-debt-amount ${isOverdue ? 'text-red-700' : 'text-red-600'}">${formatUSD(item.amount)}</div>
+                                    <div class="report-debt-meta">
+                                        <span><strong>Oldest:</strong> ${item.oldestDate || '-'}</span>
+                                        <span><strong>Latest:</strong> ${item.latestDate || '-'}</span>
+                                        <span><strong>Note:</strong> ${normalizePdfText(item.contactNote || '-')}</span>
+                                    </div>
+                                    ${isOverdue ? `<div class="report-debt-overdue-badge">Overdue ${item.ageDays} days</div>` : ''}
+                                </article>`;
+                            }).join('');
+                        }
+                    }
+                }
+
+                return {
+                    range,
+                    rows: cashRangeRows,
+                    totals: {
+                        totalExpenses,
+                        totalIncomes,
+                        totalSalary,
+                        totalRecovery,
+                        totalLending,
+                        totalCashIn,
+                        totalCashOut,
+                        netCashFlow
+                    },
+                    debts
+                };
+            }
+
+            function exportConsolidatedReportCSV() {
+                const report = renderReportAggregation();
+                if (!report.rows.length) {
+                    showMessage('No data to export for the selected report range.', 'info');
+                    return;
+                }
+
+                const headers = ['Date', 'Collection', 'Type', 'Description', 'User', 'Original Amount', 'Currency', 'Amount (USD)', 'Ref Month', 'Person Name', 'Status', 'Entry Date', 'Completed Date', 'ID'];
+                const rows = report.rows.map(item => [
+                    `"${item.date || ''}"`,
+                    `"${item.collection || ''}"`,
+                    `"${item.type || ''}"`,
+                    `"${String(item.description || '').replace(/"/g, '""')}"`,
+                    `"${String(item.user || '').replace(/"/g, '""')}"`,
+                    Number(item.original_amount || 0).toFixed(2),
+                    `"${item.currency || 'USD'}"`,
+                    Number(item.amount || 0).toFixed(2),
+                    `"${item.ref_month || ''}"`,
+                    `"${String(item.person_name || '').replace(/"/g, '""')}"`,
+                    `"${item.status || ''}"`,
+                    `"${item.entry_date || ''}"`,
+                    `"${item.completed_date || ''}"`,
+                    `"${item.id || ''}"`
+                ].join(','));
+
+                const summaryBlock = [
+                    ['Report Range', report.range.label],
+                    ['Total Cash In', formatUSD(report.totals.totalCashIn)],
+                    ['Total Cash Out', formatUSD(report.totals.totalCashOut)],
+                    ['Net Cash Flow', formatUSD(report.totals.netCashFlow)],
+                    ['Outstanding Debtors', String(report.debts.length)]
+                ].map(row => row.join(': ')).join('\n');
+
+                const csvContent = [summaryBlock, '', headers.join(','), ...rows].join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `financial_report_${new Date().toISOString().split('T')[0]}.csv`;
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage(`Successfully exported ${report.rows.length} transactions to CSV!`, 'success');
+            }
+
+            async function exportConsolidatedReportPDF() {
+                const report = renderReportAggregation();
+                if (!report.rows.length) {
+                    showMessage('No data to export for the selected report range.', 'info');
+                    return;
+                }
+
+                const pdfBase = await createStyledPdf('Financial Report', report.range.label);
+                if (!pdfBase || !pdfBase.doc || !pdfBase.doc.autoTable) {
+                    showMessage('PDF table plugin failed to load.', 'error');
+                    return;
+                }
+
+                const { doc, baseFont, khmerFont } = pdfBase;
+                const reportMargin = 32;
+                let cursorY = pdfBase.cursorY;
+
+                cursorY = drawReportSummaryBox(doc, baseFont, cursorY, report);
+
+                const expenseCategories = getExpenseCategorySummary(report.rows);
+                if (expenseCategories.length) {
+                    doc.setFont(baseFont, 'bold');
+                    doc.setFontSize(10);
+                    doc.text('Expense Summary by Category', reportMargin, cursorY);
+                    doc.autoTable({
+                        startY: cursorY + 6,
+                        columns: [
+                            { header: 'Category', dataKey: 'category' },
+                            { header: 'Amount (USD)', dataKey: 'amountUsd' },
+                            { header: 'Amount (KHR)', dataKey: 'amountKhr' }
+                        ],
+                        body: expenseCategories.map(item => ({
+                            category: normalizePdfText(item.category),
+                            amountUsd: formatUSD(item.amount),
+                            amountKhr: formatKhrDisplay(item.amount)
+                        })),
+                        styles: {
+                            font: baseFont,
+                            fontSize: 7.8,
+                            cellPadding: 3.5,
+                            valign: 'middle',
+                            overflow: 'linebreak'
+                        },
+                        headStyles: {
+                            fillColor: [16, 185, 129],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 8
+                        },
+                        alternateRowStyles: {
+                            fillColor: [240, 253, 244]
+                        },
+                        tableLineColor: [220, 234, 220],
+                        tableLineWidth: 0.2,
+                        columnStyles: {
+                            category: { cellWidth: 'auto', minCellWidth: 110 },
+                            amountUsd: { cellWidth: 74, halign: 'right' },
+                            amountKhr: { cellWidth: 82, halign: 'right' }
+                        },
+                        margin: { left: reportMargin, right: reportMargin },
+                        tableWidth: 'auto'
+                    });
+                    cursorY = doc.lastAutoTable.finalY + 14;
+                }
+
+                doc.autoTable({
+                    startY: cursorY,
+                    columns: [
+                        { header: 'Date', dataKey: 'date' },
+                        { header: 'Collection', dataKey: 'collection' },
+                        { header: 'Type', dataKey: 'type' },
+                        { header: 'Description', dataKey: 'description' },
+                        { header: 'Amount', dataKey: 'amount' },
+                        { header: 'Status', dataKey: 'status' }
+                    ],
+                    body: report.rows.map(item => ({
+                        date: item.date || '-',
+                        collection: normalizePdfText(item.collection || '-'),
+                        type: normalizePdfText(item.collection === 'financial_ledger' ? (item.ledger_type || '-') : item.type),
+                        description: normalizePdfText(item.description || '-'),
+                        amount: item.currency === 'KHR'
+                            ? `${formatUSD(item.amount || 0)} (${formatKhrDisplay(item.original_amount || 0)})`
+                            : `${formatUSD(item.amount || 0)}${item.original_amount && item.original_amount !== item.amount ? ` (${formatUSD(item.original_amount)})` : ''}`,
+                        status: item.status || '-'
+                    })),
+                    styles: {
+                        font: baseFont,
+                        fontSize: 7.8,
+                        cellPadding: 3.5,
+                        valign: 'middle',
+                        overflow: 'linebreak'
+                    },
+                    headStyles: {
+                        fillColor: [99, 102, 241],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        fontSize: 8
+                    },
+                    alternateRowStyles: {
+                        fillColor: [248, 249, 252]
+                    },
+                    tableLineColor: [226, 232, 240],
+                    tableLineWidth: 0.2,
+                    columnStyles: {
+                        date: { cellWidth: 58 },
+                        collection: { cellWidth: 72 },
+                        type: { cellWidth: 54 },
+                        description: { cellWidth: 'auto', minCellWidth: 104 },
+                        amount: { cellWidth: 112, halign: 'right' },
+                        status: { cellWidth: 58, halign: 'center' }
+                    },
+                    margin: { left: reportMargin, right: reportMargin },
+                    tableWidth: 'auto',
+                    didParseCell: (data) => {
+                        if (data.section === 'body' && data.column.dataKey === 'amount') {
+                            data.cell.styles.halign = 'right';
+                        }
+                        if (data.section === 'body' && data.column.dataKey === 'status') {
+                            data.cell.styles.halign = 'center';
+                        }
+                    }
+                });
+
+                if (report.debts.length) {
+                    const debtStartY = doc.lastAutoTable.finalY + 18;
+                    doc.setFont(baseFont, 'bold');
+                    doc.setFontSize(11);
+                    doc.text('Outstanding Debts Summary', reportMargin, debtStartY);
+                    doc.autoTable({
+                        startY: debtStartY + 6,
+                        columns: [
+                            { header: 'Person', dataKey: 'person' },
+                            { header: 'Entries', dataKey: 'count' },
+                            { header: 'Outstanding USD', dataKey: 'amount' },
+                            { header: 'Oldest Entry', dataKey: 'oldestDate' },
+                            { header: 'Latest Entry', dataKey: 'latestDate' },
+                            { header: 'Contact/Note', dataKey: 'contactNote' }
+                        ],
+                        body: report.debts.map(item => ({
+                            person: normalizePdfText(item.person),
+                            count: item.count,
+                            amount: formatUSD(item.amount),
+                            oldestDate: item.oldestDate || '-',
+                            latestDate: item.latestDate || '-',
+                            contactNote: normalizePdfText(item.contactNote || '-')
+                        })),
+                        styles: {
+                            font: baseFont,
+                            fontSize: 7.6,
+                            cellPadding: 3.5,
+                            valign: 'middle',
+                            overflow: 'linebreak'
+                        },
+                        headStyles: {
+                            fillColor: [239, 68, 68],
+                            textColor: 255,
+                            fontStyle: 'bold',
+                            fontSize: 8
+                        },
+                        alternateRowStyles: {
+                            fillColor: [254, 242, 242]
+                        },
+                        tableLineColor: [251, 191, 191],
+                        tableLineWidth: 0.2,
+                        columnStyles: {
+                            person: { cellWidth: 'auto', minCellWidth: 84 },
+                            count: { cellWidth: 42, halign: 'center' },
+                            amount: { cellWidth: 78, halign: 'right' },
+                            oldestDate: { cellWidth: 66 },
+                            latestDate: { cellWidth: 66 },
+                            contactNote: { cellWidth: 'auto', minCellWidth: 86 }
+                        },
+                        margin: { left: reportMargin, right: reportMargin },
+                        tableWidth: 'auto',
+                        didParseCell: (data) => {
+                            if (data.row && data.row.raw && report.debts[data.row.index] && report.debts[data.row.index].ageDays > 30) {
+                                data.cell.styles.textColor = [185, 28, 28];
+                                data.cell.styles.fontStyle = 'bold';
+                            }
+                        }
+                    });
+                }
+
+                addPageNumbers(doc, baseFont);
+                forcePdfDownload(doc, `financial_report_${new Date().toISOString().split('T')[0]}.pdf`);
+                showMessage(`Successfully exported ${report.rows.length} report transactions to PDF!`, 'success');
+            }
+
 
             function calculateSummary(expensesData, incomesData) {
                 const now = new Date();
@@ -6775,12 +8556,15 @@
                 document.getElementById('week-total').textContent = formatUSD(summary.weekExpense);
                 document.getElementById('month-total').textContent = formatUSD(summary.monthExpense);
 
-                const totalIncome = incomes.reduce((sum, i) => sum + convertToUSD(i.amount, i.currency), 0);
                 const currentMonth = new Date().toISOString().slice(0, 7);
                 const currentMonthIncomes = incomes.filter(i => i.date.startsWith(currentMonth));
                 const currentMonthTotalIncome = currentMonthIncomes.reduce((sum, i) => sum + convertToUSD(i.amount, i.currency), 0);
+                const ledgerMonthTotals = calculateFinancialLedgerTotals(financialLedger, {
+                    monthKey: currentMonth
+                });
+                const netBalance = (currentMonthTotalIncome + ledgerMonthTotals.totalSalary + ledgerMonthTotals.totalRecovery) - (summary.monthExpense + ledgerMonthTotals.totalLending);
                 document.getElementById('total-income').textContent = formatUSD(currentMonthTotalIncome);
-                document.getElementById('net-balance').textContent = formatUSD(summary.monthIncome - summary.monthExpense);
+                document.getElementById('net-balance').textContent = formatUSD(netBalance);
 
                 // Update Quick Stats Cards on Entry Tab
                 const quickTodayEl = document.getElementById('quick-today-total');
@@ -6792,7 +8576,7 @@
                 if (quickMonthExpenseEl) quickMonthExpenseEl.textContent = formatUSD(summary.monthExpense);
                 if (quickMonthIncomeEl) quickMonthIncomeEl.textContent = formatUSD(currentMonthTotalIncome);
                 if (quickNetBalanceEl) {
-                    const netBalance = currentMonthTotalIncome - summary.monthExpense;
+                    const netBalance = (currentMonthTotalIncome + ledgerMonthTotals.totalSalary + ledgerMonthTotals.totalRecovery) - (summary.monthExpense + ledgerMonthTotals.totalLending);
                     quickNetBalanceEl.textContent = formatUSD(netBalance);
                     // Add color based on positive/negative balance
                     if (netBalance >= 0) {
@@ -7038,6 +8822,9 @@
                     if (!document.getElementById('income-tab').classList.contains('hidden')) {
                         renderIncomeTable(incomes);
                     }
+                    if (!document.getElementById('ledger-tab').classList.contains('hidden')) {
+                        renderLedgerSection();
+                    }
                     if (!document.getElementById('history-tab').classList.contains('hidden')) {
                         renderHistoryTable();
                     }
@@ -7046,9 +8833,12 @@
                         const summary = calculateSummary(expenses, incomes);
                         renderSummaryKPIs(summary);
                         renderCharts(summary);
-                        const months = getUniqueMonths([...expenses, ...incomes]);
+                        const months = getUniqueMonths([...expenses, ...incomes, ...financialLedger]);
                         populateMonthSelect(months);
+                        renderReportAggregation();
                     }
+
+                    renderLedgerSection();
 
                     renderCategoryManagementTable();
                     renderIncomeCategoryManagementTable();
@@ -7272,6 +9062,7 @@
                     'dashboard': '<i class="fas fa-home mr-2"></i> Overview',
                     'entry': '<i class="fas fa-wallet mr-2"></i> New Entry',
                     'income': '<i class="fas fa-dollar-sign mr-2"></i> Add Income',
+                    'ledger': '<i class="fas fa-book mr-2"></i> Ledger',
                     'history': '<i class="fas fa-history mr-2"></i> History',
                     'report': '<i class="fas fa-chart-bar mr-2"></i> Report',
                     'settings': '<i class="fas fa-cog mr-2"></i> Settings',
@@ -7287,7 +9078,7 @@
                 tabContents.forEach(c => c.classList.toggle('hidden', c.id !== `${tab}-tab`));
 
                 if (fabContainer) {
-                    if (tab === 'settings' || tab === 'dashboard' || tab === 'category-management' || tab === 'user-control') {
+                    if (tab === 'settings' || tab === 'dashboard' || tab === 'category-management' || tab === 'user-control' || tab === 'ledger') {
                         fabContainer.classList.add('hidden');
                         fabContainer.classList.remove('open');
                         if (fabMain) fabMain.classList.remove('active');
@@ -7311,6 +9102,8 @@
                         }
                     }, 200);
                 } else if (tab === 'income') {
+                    updateUI();
+                } else if (tab === 'ledger') {
                     updateUI();
                 } else if (tab === 'history') {
                     renderHistoryTable();
@@ -7359,10 +9152,13 @@
                     const currentMonth = new Date().toISOString().slice(0, 7);
                     const currentMonthIncomes = incomes.filter(i => i.date && i.date.startsWith(currentMonth));
                     const currentMonthTotalIncome = currentMonthIncomes.reduce((sum, i) => sum + convertToUSD(i.amount, i.currency), 0);
+                    const ledgerMonthTotals = calculateFinancialLedgerTotals(financialLedger, {
+                        monthKey: currentMonth
+                    });
 
                     if (quickMonthIncomeEl) quickMonthIncomeEl.textContent = formatUSD(currentMonthTotalIncome);
                     if (quickNetBalanceEl) {
-                        const netBalance = currentMonthTotalIncome - summary.monthExpense;
+                        const netBalance = (currentMonthTotalIncome + ledgerMonthTotals.totalSalary + ledgerMonthTotals.totalRecovery) - (summary.monthExpense + ledgerMonthTotals.totalLending);
                         quickNetBalanceEl.textContent = formatUSD(netBalance);
                         // Add color based on positive/negative balance
                         if (netBalance >= 0) {
@@ -7413,66 +9209,59 @@
             }
 
             function initializeSettingsTab() {
-                // --- User Profile Info ---
-                if (window.currentUser) {
-                    // Show profile photo if available
-                    const photoDiv = document.getElementById('user-profile-photo');
-                    if (photoDiv) {
-                        const photoImg = document.getElementById('user-profile-photo-img');
-                        const photoFallback = document.getElementById('user-profile-photo-fallback');
-                        if (photoImg && photoFallback) {
-                            if (window.currentUser.photoURL) {
-                                photoImg.src = window.currentUser.photoURL;
-                                photoImg.classList.remove('hidden');
-                                photoFallback.classList.add('hidden');
-                            } else {
-                                photoImg.removeAttribute('src');
-                                photoImg.classList.add('hidden');
-                                photoFallback.classList.remove('hidden');
-                            }
+                const currentUser = window.currentUser;
+
+                if (currentUser) {
+                    const photoImg = document.getElementById('user-profile-photo-img');
+                    const photoFallback = document.getElementById('user-profile-photo-fallback');
+                    if (photoImg && photoFallback) {
+                        if (currentUser.photoURL) {
+                            photoImg.src = currentUser.photoURL;
+                            photoImg.classList.remove('hidden');
+                            photoFallback.classList.add('hidden');
+                        } else {
+                            photoImg.removeAttribute('src');
+                            photoImg.classList.add('hidden');
+                            photoFallback.classList.remove('hidden');
                         }
                     }
-                    // Show display name and email
+
                     const nameDiv = document.getElementById('user-profile-name');
                     if (nameDiv) {
-                        const emailName = window.currentUser.email ? window.currentUser.email.split('@')[0] : '';
-                        nameDiv.textContent = window.currentUser.displayName || emailName || 'No Name';
+                        const emailName = currentUser.email ? currentUser.email.split('@')[0] : '';
+                        nameDiv.textContent = currentUser.displayName || emailName || 'No Name';
                     }
+
                     const emailDiv = document.getElementById('user-profile-email');
-                    if (emailDiv) emailDiv.textContent = window.currentUser.email || '-';
+                    if (emailDiv) emailDiv.textContent = currentUser.email || '-';
                 }
 
-                // --- User Statistics (This Month) ---
-                // 1. Collect all users from expenses/incomes (this month only)
                 const now = new Date();
                 const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                 const usersSet = new Set();
                 const userStats = {};
-                // Expenses
-                expenses.filter(e => e.date && e.date.startsWith(monthKey)).forEach(e => {
-                    const user = e.user || 'Self';
+
+                expenses.filter(entry => entry.date && entry.date.startsWith(monthKey)).forEach(entry => {
+                    const user = entry.user || 'Self';
                     usersSet.add(user);
-                    if (!userStats[user]) userStats[user] = {
-                        expense: 0,
-                        income: 0
-                    };
-                    userStats[user].expense += convertToUSD(e.amount, e.currency);
+                    if (!userStats[user]) {
+                        userStats[user] = { expense: 0, income: 0 };
+                    }
+                    userStats[user].expense += convertToUSD(entry.amount, entry.currency);
                 });
-                // Incomes
-                incomes.filter(i => i.date && i.date.startsWith(monthKey)).forEach(i => {
-                    const user = i.user || 'Self';
+
+                incomes.filter(entry => entry.date && entry.date.startsWith(monthKey)).forEach(entry => {
+                    const user = entry.user || 'Self';
                     usersSet.add(user);
-                    if (!userStats[user]) userStats[user] = {
-                        expense: 0,
-                        income: 0
-                    };
-                    userStats[user].income += convertToUSD(i.amount, i.currency);
+                    if (!userStats[user]) {
+                        userStats[user] = { expense: 0, income: 0 };
+                    }
+                    userStats[user].income += convertToUSD(entry.amount, entry.currency);
                 });
-                // 2. Update total users
-                const totalUsers = usersSet.size;
+
                 const totalUsersSpan = document.getElementById('user-stats-total-users');
-                if (totalUsersSpan) totalUsersSpan.textContent = totalUsers;
-                // 3. Fill table
+                if (totalUsersSpan) totalUsersSpan.textContent = String(usersSet.size);
+
                 const tableBody = document.getElementById('user-stats-table-body');
                 if (tableBody) {
                     tableBody.innerHTML = '';
@@ -7484,28 +9273,28 @@
                                         <td class="pr-4 py-1 font-bold text-indigo-900">${user}</td>
                                         <td class="pr-4 py-1 text-red-600">${formatUSD(stat.expense)}</td>
                                         <td class="pr-4 py-1 text-green-600">${formatUSD(stat.income)}</td>
-                                        <td class="pr-4 py-1 text-blue-600">${formatUSD(net)}</td>
+                                        <td class="pr-4 py-1 ${net >= 0 ? 'text-green-700' : 'text-red-700'}">${formatUSD(net)}</td>
                                     </tr>
                                 `;
                     });
                 }
+
                 const rateInput = document.getElementById('exchange-rate-input');
-                const currentDisplay = document.getElementById('current-rate-display');
-                const dashboardRate = document.getElementById('settings-card-rate-value');
                 if (rateInput) {
                     rateInput.value = getExchangeRate();
                 }
+
+                const currentDisplay = document.getElementById('current-rate-display');
                 if (currentDisplay) {
                     currentDisplay.textContent = getExchangeRate().toLocaleString() + '៛';
                 }
 
+                const dashboardRate = document.getElementById('dashboard-exchange-rate');
                 if (dashboardRate) {
                     dashboardRate.textContent = getExchangeRate().toLocaleString() + ' KHR';
                 }
 
                 showSettingsDashboardHome();
-
-                // --- Initialize Admin Panel ---
                 initializeAdminPanel();
             }
 
@@ -7729,6 +9518,7 @@
                 // Unsubscribe from current listeners
                 if (firestoreUnsubscribe.expenses) firestoreUnsubscribe.expenses();
                 if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
+                if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
                 firestoreUnsubscribe = {};
 
                 // Start listening to selected user's data
@@ -7791,6 +9581,7 @@
                 if (currentUser && db) {
                     if (firestoreUnsubscribe.expenses) firestoreUnsubscribe.expenses();
                     if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
+                    if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
                     firestoreUnsubscribe = {};
                     startFirestoreListener(currentUser.uid);
                 }
@@ -8066,6 +9857,13 @@
                 document.getElementById('date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('income-date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('currency').value = 'KHR';
+                const ledgerEntryDate = document.getElementById('ledger-entry-date');
+                const ledgerRefMonth = document.getElementById('ledger-ref-month');
+                const ledgerMonthFocus = document.getElementById('ledger-month-focus');
+                if (ledgerEntryDate) ledgerEntryDate.value = new Date().toISOString().split('T')[0];
+                if (ledgerRefMonth) ledgerRefMonth.value = getCurrentMonth();
+                if (ledgerMonthFocus) ledgerMonthFocus.value = getCurrentMonth();
+                toggleLedgerOptionalFields();
 
                 // Load custom users from localStorage first
                 loadCustomUsers();
@@ -8128,9 +9926,73 @@
                     saveIncome(incomeData);
                 });
 
+                const ledgerForm = document.getElementById('ledger-form');
+                if (ledgerForm) {
+                    ledgerForm.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        saveFinancialLedgerEntry({
+                            id: editingLedgerEntryId,
+                            type: document.getElementById('ledger-type').value,
+                            amount: document.getElementById('ledger-amount').value,
+                            currency: document.getElementById('ledger-currency').value,
+                            ref_month: document.getElementById('ledger-ref-month').value,
+                            person_name: document.getElementById('ledger-person-name').value,
+                            contact_note: document.getElementById('ledger-contact-note').value,
+                            status: document.getElementById('ledger-status').value,
+                            entry_date: document.getElementById('ledger-entry-date').value
+                        });
+                    });
+                }
+
+                const ledgerType = document.getElementById('ledger-type');
+                if (ledgerType) ledgerType.addEventListener('change', toggleLedgerOptionalFields);
+                const ledgerAmountInput = document.getElementById('ledger-amount');
+                if (ledgerAmountInput) ledgerAmountInput.addEventListener('input', updateLedgerConvertedAmountPreview);
+                const ledgerCurrencyInput = document.getElementById('ledger-currency');
+                if (ledgerCurrencyInput) ledgerCurrencyInput.addEventListener('change', updateLedgerConvertedAmountPreview);
+                const ledgerMonthInput = document.getElementById('ledger-month-focus');
+                if (ledgerMonthInput) ledgerMonthInput.addEventListener('change', renderLedgerSection);
+                const ledgerViewFilter = document.getElementById('ledger-view-filter');
+                if (ledgerViewFilter) ledgerViewFilter.addEventListener('change', renderLedgerSection);
+                const saveTargetBtn = document.getElementById('ledger-save-target-btn');
+                if (saveTargetBtn) saveTargetBtn.addEventListener('click', saveCurrentMonthSalaryTarget);
+                updateLedgerConvertedAmountPreview();
+
+                const reportRangeMode = document.getElementById('report-range-mode');
+                const reportRangeMonth = document.getElementById('report-range-month');
+                const reportRangeYear = document.getElementById('report-range-year');
+                const reportRangeStart = document.getElementById('report-range-start');
+                const reportRangeEnd = document.getElementById('report-range-end');
+                const currentMonthKey = new Date().toISOString().slice(0, 7);
+                if (reportRangeMode) reportRangeMode.value = 'month';
+                if (reportRangeMonth) reportRangeMonth.value = currentMonthKey;
+                if (reportRangeYear) reportRangeYear.value = String(new Date().getFullYear());
+                if (reportRangeStart) reportRangeStart.value = `${currentMonthKey}-01`;
+                if (reportRangeEnd) {
+                    const [year, month] = currentMonthKey.split('-');
+                    const lastDay = new Date(parseInt(year, 10), parseInt(month, 10), 0).getDate();
+                    reportRangeEnd.value = `${currentMonthKey}-${String(lastDay).padStart(2, '0')}`;
+                }
+
+                const refreshReportAggregation = () => {
+                    if (!document.getElementById('report-tab').classList.contains('hidden')) {
+                        renderReportAggregation();
+                    }
+                };
+                if (reportRangeMode) reportRangeMode.addEventListener('change', refreshReportAggregation);
+                if (reportRangeMonth) reportRangeMonth.addEventListener('change', refreshReportAggregation);
+                if (reportRangeYear) reportRangeYear.addEventListener('change', refreshReportAggregation);
+                if (reportRangeStart) reportRangeStart.addEventListener('change', refreshReportAggregation);
+                if (reportRangeEnd) reportRangeEnd.addEventListener('change', refreshReportAggregation);
+
                 document.getElementById('income-cancel-edit-button').addEventListener('click', resetIncomeForm);
 
                 document.getElementById('cancel-edit-button').addEventListener('click', resetForm);
+
+                const ledgerCancelEditBtn = document.getElementById('ledger-cancel-edit-button');
+                if (ledgerCancelEditBtn) {
+                    ledgerCancelEditBtn.addEventListener('click', resetLedgerForm);
+                }
 
                 // Filters & Sorting Listeners
                 ['filter-category', 'filter-user', 'sort-by', 'filter-start-date', 'filter-end-date', 'filter-description', 'filter-month'].forEach(id => {
@@ -8247,6 +10109,14 @@
                 document.getElementById('export-pdf-btn').addEventListener('click', exportExpensesPDF);
                 document.getElementById('export-income-pdf-btn').addEventListener('click', exportIncomesPDF);
                 document.getElementById('export-history-pdf-btn').addEventListener('click', exportHistoryPDF);
+                const exportLedgerCsvBtn = document.getElementById('export-ledger-csv-btn');
+                if (exportLedgerCsvBtn) exportLedgerCsvBtn.addEventListener('click', exportLedgerToCSV);
+                const exportLedgerPdfBtn = document.getElementById('export-ledger-pdf-btn');
+                if (exportLedgerPdfBtn) exportLedgerPdfBtn.addEventListener('click', exportLedgerPDF);
+                const reportExportCsvBtn = document.getElementById('report-export-csv-btn');
+                if (reportExportCsvBtn) reportExportCsvBtn.addEventListener('click', exportConsolidatedReportCSV);
+                const reportExportPdfBtn = document.getElementById('report-export-pdf-btn');
+                if (reportExportPdfBtn) reportExportPdfBtn.addEventListener('click', exportConsolidatedReportPDF);
 
                 // Monthly Breakdown Select Listener
                 document.getElementById('report-month-select').addEventListener('change', (e) => {
@@ -8568,6 +10438,7 @@
             // Global function assignments
             window.showDeleteModal = showDeleteModal;
             window.editExpense = editExpense;
+            window.editFinancialLedgerEntry = editFinancialLedgerEntry;
             window.initIOSScroll = initIOSScroll;
 
             // Admin Panel global functions
@@ -8651,6 +10522,7 @@
                         if (reportMonthSelect && reportMonthSelect.value) {
                             renderWeeklyBreakdown(reportMonthSelect.value);
                         }
+                        renderReportAggregation();
                     }
                     updateMonthlyChartsTheme();
                 }
@@ -8936,6 +10808,7 @@
                 let totalExpense = 0;
                 let monthIncome = 0;
                 let totalIncome = 0;
+                const currentMonthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
 
                 // Calculate expenses - use local expenses variable (not window.expenses)
                 if (typeof expenses !== 'undefined' && expenses && expenses.length > 0) {
@@ -8967,8 +10840,10 @@
                     });
                 }
 
-                const balance = totalIncome - totalExpense;
-                const monthNet = monthIncome - monthExpense;
+                const balance = calculateNetBalanceWithLedger().netBalance;
+                const monthNet = calculateNetBalanceWithLedger({
+                    monthKey: currentMonthKey
+                }).netBalance;
 
                 // Update dashboard stats
                 updateElementSafe('dashboard-balance', formatCurrency(balance, 'USD'), balance >= 0 ? 'text-green-500' : 'text-red-500');
@@ -9089,6 +10964,10 @@
                     <div class="nav-icon"><i class="fas fa-hand-holding-dollar"></i></div>
                     <div class="nav-label">Income</div>
                 </div>
+                <div class="nav-item" data-tab="ledger" onclick="switchTab('ledger')">
+                    <div class="nav-icon"><i class="fas fa-book"></i></div>
+                    <div class="nav-label">Ledger</div>
+                </div>
                 <div class="nav-item" data-tab="history" onclick="switchTab('history')">
                     <div class="nav-icon"><i class="fas fa-clock-rotate-left"></i></div>
                     <div class="nav-label">History</div>
@@ -9105,22 +10984,22 @@
         </nav>
 
         <!-- Professional Footer -->
-        <footer class="hidden md:block bg-gray-900 text-white py-6 mt-8">
+        <footer class="hidden md:block bg-transparent text-gray-600 py-6 mt-12 border-t border-gray-200">
             <div class="container mx-auto px-4">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-3">
                         <div class="w-14 h-14 flex items-center justify-center">
-                            <img src="AppLogo/logoEMS-standalone-icon.png" alt="EMS Tracker Logo" class="w-full h-full object-contain">
+                            <img src="AppLogo/logoEMS-standalone-icon.png" alt="EMS Tracker Logo" class="w-full h-full object-contain opacity-60 hover:opacity-100 transition-opacity">
                         </div>
                         <div>
-                            <p class="font-bold text-sm">EMS Tracker</p>
+                            <p class="font-bold text-sm text-gray-800">EMS Tracker</p>
                             <p class="text-xs text-gray-400">Professional Expense Management</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-6 text-sm">
                         <span class="text-gray-400">© 2026 V2.0</span>
-                        <span class="font-semibold">SUOS THEANSOU</span>
-                        <a href="tel:+85570605799" class="text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2">
+                        <span class="font-semibold text-gray-700">SUOS THEANSOU</span>
+                        <a href="tel:+85570605799" class="text-indigo-500 hover:text-indigo-600 transition-colors flex items-center gap-2 font-medium">
                             <i class="fas fa-phone-alt"></i> +855 70 605 799
                         </a>
                     </div>
@@ -9129,4 +11008,4 @@
         </footer>
 </body>
 
-</html>e
+</html>
