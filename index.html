@@ -56,7 +56,15 @@
         
         .khmer,
         .khmer * {
-            font-family: 'Noto Sans Khmer', 'Hanuman', 'Khmer OS', Arial, sans-serif !important;
+            font-family: 'NotoSansKhmerUI', 'Noto Sans Khmer', 'Hanuman', 'Khmer OS', sans-serif !important;
+            line-height: 1.58;
+            letter-spacing: 0;
+            word-spacing: 0;
+            font-kerning: normal;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-synthesis: none;
         }
     </style>
 
@@ -1119,19 +1127,34 @@
                         </div>
 
                         <div class="glass-panel p-5 md:p-6 rounded-2xl shadow-xl">
-                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4">
-                                <div>
+                            <div class="ledger-transactions-header flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4">
+                                <div class="min-w-0">
                                     <h3 class="text-lg font-bold text-gray-800">Ledger Transactions</h3>
-                                    <div class="flex items-center gap-2 mt-2 md:mt-0">
-                                        <label for="ledger-view-filter" class="text-sm font-semibold text-gray-600">View:</label>
-                                        <select id="ledger-view-filter" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
-                                            <option value="selected-month">Selected Month</option>
-                                            <option value="all-months">View All Months</option>
-                                            <option value="all-pending">View All Pending</option>
-                                        </select>
+                                    <div class="ledger-filter-row mt-2 md:mt-0">
+                                        <div class="ledger-filter-group">
+                                            <label for="ledger-view-filter" class="text-sm font-semibold text-gray-600">View:</label>
+                                            <select id="ledger-view-filter" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
+                                                <option value="selected-month">Selected Month</option>
+                                                <option value="all-months">View All Months</option>
+                                                <option value="all-pending">View All Pending</option>
+                                                <option value="salary-partial-month">Salary Partial (Selected Month)</option>
+                                                <option value="salary-partial-all">Salary Partial (All Months)</option>
+                                            </select>
+                                        </div>
+                                        <div class="ledger-filter-group">
+                                            <label for="ledger-status-filter" class="text-sm font-semibold text-gray-600">Status:</label>
+                                            <select id="ledger-status-filter" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
+                                                <option value="all">All</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="completed">Completed</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" id="ledger-filter-clear-btn" class="ledger-filter-clear-btn" title="Reset filters to default">
+                                            Clear
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="ledger-export-group flex items-center gap-2">
                                     <button id="export-ledger-csv-btn" class="hidden md:inline-flex bg-emerald-500/90 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md transition transform hover:scale-105">
                                         <i class="fas fa-file-csv mr-1"></i> CSV
                                     </button>
@@ -3495,10 +3518,103 @@
                 RECOVERY: 'RECOVERY',
                 SALARY_PARTIAL: 'SALARY_PARTIAL'
             };
-            let salaryTargetsByMonth = JSON.parse(localStorage.getItem('salaryTargetsByMonth') || '{}');
+            const LEGACY_SALARY_TARGETS_STORAGE_KEY = 'salaryTargetsByMonth';
+            let salaryTargetsByMonth = {};
 
-            function saveSalaryTargets() {
-                localStorage.setItem('salaryTargetsByMonth', JSON.stringify(salaryTargetsByMonth));
+            function normalizeSalaryTargetEntry(target) {
+                if (typeof target === 'number' && Number.isFinite(target) && target > 0) {
+                    return {
+                        amount: target,
+                        currency: 'USD',
+                        timestamp: null
+                    };
+                }
+                if (!target || typeof target !== 'object') return null;
+
+                const amount = Number(target.amount) || 0;
+                if (amount <= 0) return null;
+
+                return {
+                    amount,
+                    currency: target.currency === 'KHR' ? 'KHR' : 'USD',
+                    timestamp: target.timestamp || null
+                };
+            }
+
+            function normalizeSalaryTargetsMap(rawTargets) {
+                const normalized = {};
+                if (!rawTargets || typeof rawTargets !== 'object') return normalized;
+
+                Object.entries(rawTargets).forEach(([monthKey, target]) => {
+                    const entry = normalizeSalaryTargetEntry(target);
+                    if (monthKey && entry) {
+                        normalized[monthKey] = entry;
+                    }
+                });
+
+                return normalized;
+            }
+
+            function readLegacySalaryTargetsFromStorage() {
+                try {
+                    return normalizeSalaryTargetsMap(JSON.parse(localStorage.getItem(LEGACY_SALARY_TARGETS_STORAGE_KEY) || '{}'));
+                } catch (err) {
+                    console.warn('Legacy salary target storage parse failed:', err);
+                    return {};
+                }
+            }
+
+            async function loadSalaryTargetsFromFirestore() {
+                if (!db || !currentUser) {
+                    salaryTargetsByMonth = {};
+                    return;
+                }
+
+                try {
+                    const settingsRef = db.collection('user_settings').doc(currentUser.uid);
+                    const snapshot = await settingsRef.get();
+                    const firestoreTargets = snapshot.exists ? normalizeSalaryTargetsMap((snapshot.data() && snapshot.data().salaryTargetsByMonth) || {}) : {};
+                    const legacyTargets = readLegacySalaryTargetsFromStorage();
+                    const mergedTargets = Object.keys(firestoreTargets).length ? firestoreTargets : legacyTargets;
+                    salaryTargetsByMonth = mergedTargets;
+
+                    if (!Object.keys(firestoreTargets).length && Object.keys(legacyTargets).length) {
+                        await settingsRef.set({
+                            userId: currentUser.uid,
+                            userEmail: (currentUser.email || '').toLowerCase(),
+                            salaryTargetsByMonth: mergedTargets,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, {
+                            merge: true
+                        });
+                    }
+
+                    if (Object.keys(legacyTargets).length) {
+                        localStorage.removeItem(LEGACY_SALARY_TARGETS_STORAGE_KEY);
+                    }
+
+                    renderLedgerSection();
+                } catch (err) {
+                    console.error('Failed to load salary targets:', err);
+                    salaryTargetsByMonth = readLegacySalaryTargetsFromStorage();
+                    renderLedgerSection();
+                }
+            }
+
+            async function saveSalaryTargets() {
+                if (!db || !currentUser) return;
+
+                const settingsRef = db.collection('user_settings').doc(currentUser.uid);
+                await settingsRef.set({
+                    userId: currentUser.uid,
+                    userEmail: (currentUser.email || '').toLowerCase(),
+                    salaryTargetsByMonth: salaryTargetsByMonth,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, {
+                    merge: true
+                });
+
+                localStorage.removeItem(LEGACY_SALARY_TARGETS_STORAGE_KEY);
             }
 
             function getSalaryTargetUSD(monthKey) {
@@ -3586,6 +3702,7 @@
                     if (firestoreUnsubscribe.expenses) firestoreUnsubscribe.expenses();
                     if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
                     if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
+                    if (firestoreUnsubscribe.settings) firestoreUnsubscribe.settings();
                     firestoreUnsubscribe = {};
                     // Start new listeners for the current user (each user has their own data)
                     startFirestoreListener(currentUser.uid);
@@ -3605,6 +3722,7 @@
                 if (firestoreUnsubscribe.expenses) firestoreUnsubscribe.expenses();
                 if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
                 if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
+                if (firestoreUnsubscribe.settings) firestoreUnsubscribe.settings();
                 firestoreUnsubscribe = {};
 
                 if (user) {
@@ -3628,13 +3746,12 @@
                     }
                     signoutBtn.classList.remove('hidden');
                     loadingScreen.classList.remove('hidden');
+                    await registerUserOnLogin(user);
+                    await loadSalaryTargetsFromFirestore();
                     startFirestoreListener(user.uid);
                     const bottomNav = document.getElementById('bottom-nav');
                     if (bottomNav) bottomNav.classList.remove('hidden');
                     updateUserSelectorsAfterLogin();
-
-                    // Register/Update user in users collection
-                    registerUserOnLogin(user);
 
                     // Initialize per-user category management state
                     initializeCategoryManagement();
@@ -3669,6 +3786,7 @@
                 const ledgerDocsByUid = new Map();
                 const ledgerDocsByEmail = new Map();
                 const ledgerDocsBySharedEmails = new Map();
+                const settingsDocRef = db.collection('user_settings').doc(groupId);
 
                 const expenseStreamReady = {
                     uid: false,
@@ -3702,6 +3820,16 @@
                     const merged = new Map([...ledgerDocsBySharedEmails, ...ledgerDocsByEmail, ...ledgerDocsByUid]);
                     financialLedger = Array.from(merged.values());
                     updateUI();
+                }
+
+                function applySalaryTargetsSnapshot(snapshot) {
+                    if (snapshot && snapshot.exists) {
+                        const data = snapshot.data() || {};
+                        salaryTargetsByMonth = normalizeSalaryTargetsMap(data.salaryTargetsByMonth || {});
+                    } else {
+                        salaryTargetsByMonth = readLegacySalaryTargetsFromStorage();
+                    }
+                    renderLedgerSection();
                 }
 
                 function mapExpenseSnapshot(snapshot, targetMap) {
@@ -4047,6 +4175,18 @@
                         });
                 }
 
+                const unsubscribeSettings = settingsDocRef.onSnapshot({
+                    includeMetadataChanges: true
+                }, snapshot => {
+                    applySalaryTargetsSnapshot(snapshot);
+                }, err => {
+                    console.error('Firebase salary settings error:', err);
+                    if (Object.keys(salaryTargetsByMonth || {}).length === 0) {
+                        salaryTargetsByMonth = readLegacySalaryTargetsFromStorage();
+                    }
+                    renderLedgerSection();
+                });
+
                 firestoreUnsubscribe.expenses = () => {
                     unsubscribeExpensesByUid();
                     if (unsubscribeExpensesByEmail) unsubscribeExpensesByEmail();
@@ -4063,6 +4203,10 @@
                     unsubscribeLedgerByUid();
                     if (unsubscribeLedgerByEmail) unsubscribeLedgerByEmail();
                     if (unsubscribeLedgerBySharedEmails) unsubscribeLedgerBySharedEmails();
+                };
+
+                firestoreUnsubscribe.settings = () => {
+                    unsubscribeSettings();
                 };
             }
 
@@ -4630,6 +4774,7 @@
                 const topSpender = (Object.entries(userTotals).sort((a, b) => b[1].usd - a[1].usd)[0] || [])[0] || 'N/A';
 
                 return {
+                    rowCount: items.length,
                     totalIncome,
                     totalExpenses,
                     totalIncomeKHR,
@@ -4642,7 +4787,7 @@
                 };
             }
 
-            async function createStyledPdf(titleText, dateRangeText) {
+            async function createStyledPdf(titleText, dateRangeText, reportTitle = 'TRANSACTION SUMMARY REPORT') {
                 if (!window.jspdf || !window.jspdf.jsPDF) {
                     showMessage('PDF library failed to load.', 'error');
                     return null;
@@ -4673,7 +4818,7 @@
                 doc.setFont(baseFont, 'bold');
                 doc.setFontSize(16);
                 doc.setTextColor(255, 255, 255);
-                doc.text('TRANSACTION SUMMARY REPORT', pageWidth / 2, 20, {
+                doc.text(reportTitle, pageWidth / 2, 20, {
                     align: 'center'
                 });
 
@@ -4700,12 +4845,20 @@
 
             function formatKhr(amount) {
                 const val = Number(amount) || 0;
-                return `៛ ${val.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+                return `KHR ${val.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
             }
 
             function formatKhrDisplay(amount) {
                 const val = Number(amount) || 0;
-                return `៛ ${Math.round(val).toLocaleString('en-US')}`;
+                return `KHR ${Math.round(val).toLocaleString('en-US')}`;
+            }
+
+            function buildPdfFilename(prefix) {
+                const safePrefix = String(prefix || 'report')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+                return `${safePrefix}-${new Date().toISOString().split('T')[0]}.pdf`;
             }
 
             function drawExecutiveSummary(doc, baseFont, startY, summary) {
@@ -4714,7 +4867,7 @@
                 const boxW = pageWidth - boxX * 2;
                 const userCount = Object.keys(summary.userTotals || {}).length;
                 const userRows = Math.ceil(userCount / 2);
-                const boxH = 110 + (userCount > 0 ? 16 + userRows * 18 : 0);
+                const boxH = 120 + (userCount > 0 ? 16 + userRows * 18 : 0);
                 const netColor = summary.netBalance >= 0 ? [22, 163, 74] : [220, 38, 38];
 
                 doc.setFillColor(246, 248, 255);
@@ -4728,59 +4881,55 @@
                 doc.text('Executive Summary', boxX + 12, startY + 18);
 
                 doc.setFontSize(9);
+                doc.setFont(baseFont, 'normal');
+                doc.setTextColor(75, 85, 99);
+                doc.text(`Rows: ${summary.rowCount || 0}`, boxX + 12, startY + 34);
+                doc.text(`Top Category: ${normalizePdfText(summary.topCategory || 'N/A')}`, boxX + 12, startY + 48);
 
                 // Row 1: Total Income
                 doc.setFont(baseFont, 'normal');
                 doc.setTextColor(45, 55, 72);
-                doc.text('Total Income:', boxX + 12, startY + 36);
+                doc.text('Total Income:', boxX + boxW / 2 + 10, startY + 34);
                 doc.setFont(baseFont, 'bold');
                 doc.setTextColor(22, 163, 74);
-                doc.text(`${formatUsd(summary.totalIncome)}`, boxX + 75, startY + 36);
+                doc.text(`${formatUsd(summary.totalIncome)}`, boxX + boxW / 2 + 80, startY + 34);
                 doc.setFont(baseFont, 'normal');
                 doc.setTextColor(100, 100, 100);
-                doc.text(`(${formatKhr(summary.totalIncomeKHR)})`, boxX + 120, startY + 36);
+                doc.text(`(${formatKhr(summary.totalIncomeKHR)})`, boxX + boxW / 2 + 125, startY + 34);
 
                 // Row 1: Total Expenses (right side)
                 doc.setFont(baseFont, 'normal');
                 doc.setTextColor(45, 55, 72);
-                doc.text('Total Expenses:', boxX + boxW / 2 + 10, startY + 36);
+                doc.text('Total Expenses:', boxX + boxW / 2 + 10, startY + 48);
                 doc.setFont(baseFont, 'bold');
                 doc.setTextColor(220, 38, 38);
-                doc.text(`${formatUsd(summary.totalExpenses)}`, boxX + boxW / 2 + 80, startY + 36);
+                doc.text(`${formatUsd(summary.totalExpenses)}`, boxX + boxW / 2 + 80, startY + 48);
                 doc.setFont(baseFont, 'normal');
                 doc.setTextColor(100, 100, 100);
-                doc.text(`(${formatKhr(summary.totalExpensesKHR)})`, boxX + boxW / 2 + 125, startY + 36);
+                doc.text(`(${formatKhr(summary.totalExpensesKHR)})`, boxX + boxW / 2 + 125, startY + 48);
 
                 // Row 2: Net Balance
                 doc.setFont(baseFont, 'bold');
                 doc.setTextColor(...netColor);
-                doc.text('Net Balance:', boxX + 12, startY + 52);
-                doc.text(`${formatUsd(summary.netBalance)}`, boxX + 75, startY + 52);
+                doc.text('Net Balance:', boxX + 12, startY + 66);
+                doc.text(`${formatUsd(summary.netBalance)}`, boxX + 75, startY + 66);
                 doc.setFont(baseFont, 'normal');
                 doc.setTextColor(100, 100, 100);
-                doc.text(`(${formatKhr(summary.netBalanceKHR)})`, boxX + 120, startY + 52);
-
-                // Row 2: Top Category (right side)
-                doc.setFont(baseFont, 'normal');
-                doc.setTextColor(45, 55, 72);
-                doc.text('Top Category:', boxX + boxW / 2 + 10, startY + 52);
-                const topCategoryText = normalizePdfText(summary.topCategory);
-                doc.setFont(hasKhmerText(topCategoryText) && khmerFontLoaded ? 'NotoSansKhmer' : baseFont, hasKhmerText(topCategoryText) && khmerFontLoaded ? 'normal' : 'bold');
-                doc.text(`${topCategoryText}`, boxX + boxW / 2 + 80, startY + 52);
+                doc.text(`(${formatKhr(summary.netBalanceKHR)})`, boxX + 120, startY + 66);
 
                 // Divider line
                 doc.setDrawColor(200, 200, 220);
-                doc.line(boxX + 12, startY + 66, boxX + boxW - 12, startY + 66);
+                doc.line(boxX + 12, startY + 80, boxX + boxW - 12, startY + 80);
 
                 // User breakdown section
                 doc.setFont(baseFont, 'bold');
                 doc.setTextColor(45, 55, 72);
                 doc.setFontSize(10);
-                doc.text('Spending by User:', boxX + 12, startY + 82);
+                doc.text('Spending by User:', boxX + 12, startY + 96);
 
                 doc.setFont(baseFont, 'normal');
                 doc.setFontSize(9);
-                let userY = startY + 96;
+                let userY = startY + 110;
                 const users = Object.entries(summary.userTotals || {}).sort((a, b) => b[1].usd - a[1].usd);
 
                 users.forEach(([user, totals], index) => {
@@ -4842,15 +4991,65 @@
                 return startY + boxH + 12;
             }
 
+            function drawLedgerSummaryBox(doc, baseFont, startY, ledger, titleLabel) {
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const boxX = 32;
+                const boxW = pageWidth - boxX * 2;
+                const boxH = 102;
+                const lendingColor = [220, 38, 38];
+                const recoveryColor = [22, 163, 74];
+                const salaryColor = [37, 99, 235];
+                const netColor = ledger.netImpact >= 0 ? [22, 163, 74] : [220, 38, 38];
+
+                doc.setFillColor(246, 248, 255);
+                doc.roundedRect(boxX, startY, boxW, boxH, 6, 6, 'F');
+                doc.setDrawColor(99, 102, 241);
+                doc.roundedRect(boxX, startY, boxW, boxH, 6, 6, 'S');
+
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(45, 55, 72);
+                doc.setFontSize(12);
+                doc.text(titleLabel || 'Ledger Summary', boxX + 12, startY + 18);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(75, 85, 99);
+                doc.text(`Rows: ${ledger.rowCount}`, boxX + 12, startY + 34);
+                doc.text(`View: ${ledger.viewLabel}`, boxX + 12, startY + 48);
+
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(lendingColor[0], lendingColor[1], lendingColor[2]);
+                doc.text(`Lending: ${formatUSD(ledger.totalLending)}`, boxX + boxW / 2 + 12, startY + 34);
+                doc.setTextColor(recoveryColor[0], recoveryColor[1], recoveryColor[2]);
+                doc.text(`Recovery: ${formatUSD(ledger.totalRecovery)}`, boxX + boxW / 2 + 12, startY + 48);
+                doc.setTextColor(salaryColor[0], salaryColor[1], salaryColor[2]);
+                doc.text(`Salary Partial: ${formatUSD(ledger.totalSalary)}`, boxX + boxW / 2 + 12, startY + 62);
+                doc.setTextColor(netColor[0], netColor[1], netColor[2]);
+                doc.text(`Net Effect: ${formatUSD(ledger.netImpact)}`, boxX + boxW / 2 + 12, startY + 76);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setTextColor(100, 100, 100);
+                doc.text(`KHR: ${formatKhrDisplay(ledger.totalLending)} / ${formatKhrDisplay(ledger.totalRecovery)} / ${formatKhrDisplay(ledger.totalSalary)} / ${formatKhrDisplay(ledger.netImpact)}`, boxX + 12, startY + 76);
+
+                return startY + boxH + 12;
+            }
+
             function addPageNumbers(doc, baseFont) {
                 const pageCount = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     doc.setPage(i);
-                    doc.setFont(baseFont, 'normal');
-                    doc.setFontSize(9);
-                    doc.setTextColor(100);
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const pageHeight = doc.internal.pageSize.getHeight();
+                    const footerY = pageHeight - 28;
+                    doc.setDrawColor(226, 232, 240);
+                    doc.line(24, footerY, pageWidth - 24, footerY);
+                    doc.setFont(baseFont, 'normal');
+                    doc.setFontSize(8.5);
+                    doc.setTextColor(100);
+                    doc.text('EMS Tracker', 24, pageHeight - 16);
+                    doc.text(`Generated ${new Date().toLocaleDateString()}`, pageWidth / 2, pageHeight - 16, {
+                        align: 'center'
+                    });
                     doc.text(`Page ${i} of ${pageCount}`, pageWidth - 24, pageHeight - 16, {
                         align: 'right'
                     });
@@ -4893,7 +5092,7 @@
                 }
 
                 const dateRangeText = getDateRangeLabel(filteredData);
-                const pdfBase = await createStyledPdf('Expenses', dateRangeText);
+                const pdfBase = await createStyledPdf('Expenses', dateRangeText, 'EXPENSE REPORT');
                 if (!pdfBase || !pdfBase.doc || !pdfBase.doc.autoTable) {
                     showMessage('PDF table plugin failed to load.', 'error');
                     return;
@@ -4945,19 +5144,21 @@
                     body,
                     styles: {
                         font: baseFont,
-                        fontSize: 8,
-                        cellPadding: 4,
+                        fontSize: 8.1,
+                        cellPadding: 4.25,
                         overflow: 'linebreak'
                     },
                     headStyles: {
                         fillColor: [99, 102, 241],
                         textColor: 255,
                         fontStyle: 'bold',
-                        fontSize: 8
+                        fontSize: 8.2
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 249, 252]
+                        fillColor: [246, 248, 252]
                     },
+                    tableLineColor: [226, 232, 240],
+                    tableLineWidth: 0.2,
                     columnStyles: {
                         idx: {
                             cellWidth: 22,
@@ -4997,6 +5198,13 @@
                             data.cell.styles.font = 'NotoSansKhmer';
                             data.cell.styles.fontStyle = 'normal';
                         }
+                        if (data.section === 'body' && data.column.dataKey === 'date') {
+                            data.cell.styles.textColor = [71, 85, 105];
+                        }
+                        if (data.section === 'body' && data.column.dataKey === 'category') {
+                            data.cell.styles.textColor = [79, 70, 229];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
                         if (data.section === 'body' && data.column.dataKey === 'amountDisplay') {
                             data.cell.styles.textColor = [220, 38, 38];
                         }
@@ -5007,7 +5215,7 @@
                 });
 
                 addPageNumbers(doc, baseFont);
-                const filename = `theansou_expenses_export_${new Date().toISOString().split('T')[0]}.pdf`;
+                const filename = buildPdfFilename('expense-report');
                 forcePdfDownload(doc, filename);
                 showMessage(`Successfully exported ${filteredData.length} expenses to PDF!`, 'success');
             }
@@ -5020,7 +5228,7 @@
                 }
 
                 const dateRangeText = getDateRangeLabel(filteredData);
-                const pdfBase = await createStyledPdf('Income', dateRangeText);
+                const pdfBase = await createStyledPdf('Income', dateRangeText, 'INCOME REPORT');
                 if (!pdfBase || !pdfBase.doc || !pdfBase.doc.autoTable) {
                     showMessage('PDF table plugin failed to load.', 'error');
                     return;
@@ -5072,19 +5280,21 @@
                     body,
                     styles: {
                         font: baseFont,
-                        fontSize: 8,
-                        cellPadding: 4,
+                        fontSize: 8.1,
+                        cellPadding: 4.25,
                         overflow: 'linebreak'
                     },
                     headStyles: {
                         fillColor: [99, 102, 241],
                         textColor: 255,
                         fontStyle: 'bold',
-                        fontSize: 8
+                        fontSize: 8.2
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 249, 252]
+                        fillColor: [246, 248, 252]
                     },
+                    tableLineColor: [226, 232, 240],
+                    tableLineWidth: 0.2,
                     columnStyles: {
                         idx: {
                             cellWidth: 22,
@@ -5124,6 +5334,13 @@
                             data.cell.styles.font = 'NotoSansKhmer';
                             data.cell.styles.fontStyle = 'normal';
                         }
+                        if (data.section === 'body' && data.column.dataKey === 'date') {
+                            data.cell.styles.textColor = [71, 85, 105];
+                        }
+                        if (data.section === 'body' && data.column.dataKey === 'source') {
+                            data.cell.styles.textColor = [5, 150, 105];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
                         if (data.section === 'body' && data.column.dataKey === 'amountDisplay') {
                             data.cell.styles.textColor = [22, 163, 74];
                         }
@@ -5134,7 +5351,7 @@
                 });
 
                 addPageNumbers(doc, baseFont);
-                const filename = `theansou_incomes_export_${new Date().toISOString().split('T')[0]}.pdf`;
+                const filename = buildPdfFilename('income-report');
                 forcePdfDownload(doc, filename);
                 showMessage(`Successfully exported ${filteredData.length} incomes to PDF!`, 'success');
             }
@@ -5155,7 +5372,7 @@
                 }
 
                 const dateRangeText = getDateRangeLabel(filteredData);
-                const pdfBase = await createStyledPdf('History', dateRangeText);
+                const pdfBase = await createStyledPdf('History', dateRangeText, 'TRANSACTION HISTORY REPORT');
                 if (!pdfBase || !pdfBase.doc || !pdfBase.doc.autoTable) {
                     showMessage('PDF table plugin failed to load.', 'error');
                     return;
@@ -5213,19 +5430,21 @@
                     body,
                     styles: {
                         font: baseFont,
-                        fontSize: 8,
-                        cellPadding: 4,
+                        fontSize: 8.1,
+                        cellPadding: 4.25,
                         overflow: 'linebreak'
                     },
                     headStyles: {
                         fillColor: [99, 102, 241],
                         textColor: 255,
                         fontStyle: 'bold',
-                        fontSize: 8
+                        fontSize: 8.2
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 249, 252]
+                        fillColor: [246, 248, 252]
                     },
+                    tableLineColor: [226, 232, 240],
+                    tableLineWidth: 0.2,
                     columnStyles: {
                         idx: {
                             cellWidth: 18,
@@ -5268,6 +5487,13 @@
                             data.cell.styles.font = 'NotoSansKhmer';
                             data.cell.styles.fontStyle = 'normal';
                         }
+                        if (data.section === 'body' && data.column.dataKey === 'date') {
+                            data.cell.styles.textColor = [71, 85, 105];
+                        }
+                        if (data.section === 'body' && data.column.dataKey === 'collection') {
+                            data.cell.styles.textColor = [79, 70, 229];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
                         if (data.section === 'body' && data.column.dataKey === 'amountDisplay') {
                             const isIncome = data.row.raw.type === 'income';
                             data.cell.styles.textColor = isIncome ? [22, 163, 74] : [220, 38, 38];
@@ -5279,24 +5505,77 @@
                 });
 
                 addPageNumbers(doc, baseFont);
-                const filename = `theansou_history_export_${new Date().toISOString().split('T')[0]}.pdf`;
+                const filename = buildPdfFilename('transaction-history-report');
                 forcePdfDownload(doc, filename);
                 showMessage(`Successfully exported ${filteredData.length} transactions to PDF!`, 'success');
             }
 
-            function getFilteredLedgerRows() {
+            function getLedgerFilterContext() {
                 const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
-                return [...financialLedger]
-                    .filter(item => shouldShowLedgerRow(item, monthKey))
-                    .sort((a, b) => {
-                        const priorityDiff = getLedgerSortPriority(a) - getLedgerSortPriority(b);
-                        if (priorityDiff !== 0) return priorityDiff;
-                        const da = (a.completed_date || a.entry_date || '');
-                        const dbDate = (b.completed_date || b.entry_date || '');
-                        if (da < dbDate) return 1;
-                        if (da > dbDate) return -1;
-                        return 0;
-                    });
+                const filterDropdown = document.getElementById('ledger-view-filter');
+                const filterMode = filterDropdown ? filterDropdown.value : 'selected-month';
+                const statusDropdown = document.getElementById('ledger-status-filter');
+                const statusFilter = statusDropdown ? statusDropdown.value : 'all';
+
+                let rows = [...financialLedger];
+                if (filterMode === 'selected-month') {
+                    rows = rows.filter(item => shouldShowLedgerRow(item, monthKey));
+                } else if (filterMode === 'all-pending') {
+                    rows = rows.filter(item => item.type === LEDGER_TYPES.LENDING && item.status === 'pending');
+                } else if (filterMode === 'salary-partial-month') {
+                    rows = rows.filter(item => item.type === LEDGER_TYPES.SALARY_PARTIAL && getLedgerViewMonthKey(item) === monthKey);
+                } else if (filterMode === 'salary-partial-all') {
+                    rows = rows.filter(item => item.type === LEDGER_TYPES.SALARY_PARTIAL);
+                }
+
+                if (statusFilter === 'pending' || statusFilter === 'completed') {
+                    rows = rows.filter(item => item.status === statusFilter);
+                }
+
+                rows.sort((a, b) => {
+                    const priorityDiff = getLedgerSortPriority(a) - getLedgerSortPriority(b);
+                    if (priorityDiff !== 0) return priorityDiff;
+                    const da = (a.completed_date || a.entry_date || '');
+                    const dbDate = (b.completed_date || b.entry_date || '');
+                    if (da < dbDate) return 1;
+                    if (da > dbDate) return -1;
+                    return 0;
+                });
+
+                let label = `Reference month ${monthKey}`;
+                let fileSuffix = monthKey;
+                if (filterMode === 'all-months') {
+                    label = 'All months';
+                    fileSuffix = 'all-months';
+                } else if (filterMode === 'all-pending') {
+                    label = 'All pending lending';
+                    fileSuffix = 'all-pending';
+                } else if (filterMode === 'salary-partial-month') {
+                    label = `Salary partial (${monthKey})`;
+                    fileSuffix = `salary-partial_${monthKey}`;
+                } else if (filterMode === 'salary-partial-all') {
+                    label = 'Salary partial (all months)';
+                    fileSuffix = 'salary-partial-all-months';
+                }
+
+                if (statusFilter !== 'all') {
+                    const statusSuffix = statusFilter === 'completed' ? 'completed' : 'pending';
+                    label = `${label} | Status: ${statusSuffix}`;
+                    fileSuffix = `${fileSuffix}_${statusSuffix}`;
+                }
+
+                return {
+                    monthKey,
+                    filterMode,
+                    statusFilter,
+                    rows,
+                    label,
+                    fileSuffix
+                };
+            }
+
+            function getFilteredLedgerRows() {
+                return getLedgerFilterContext().rows;
             }
 
             function convertToLedgerCSV(data) {
@@ -5319,9 +5598,12 @@
             }
 
             function exportLedgerToCSV() {
-                const rows = getFilteredLedgerRows();
+                const {
+                    rows,
+                    fileSuffix
+                } = getLedgerFilterContext();
                 if (!rows.length) {
-                    showMessage('No ledger data to export for selected month.', 'info');
+                    showMessage('No ledger data to export for the selected view.', 'info');
                     return;
                 }
 
@@ -5331,9 +5613,8 @@
                 });
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
                 link.setAttribute('href', url);
-                link.setAttribute('download', `theansou_ledger_${monthKey}_${new Date().toISOString().split('T')[0]}.csv`);
+                link.setAttribute('download', `theansou_ledger_${fileSuffix}_${new Date().toISOString().split('T')[0]}.csv`);
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
@@ -5342,15 +5623,20 @@
             }
 
             async function exportLedgerPDF() {
-                const rows = getFilteredLedgerRows();
+                const {
+                    rows,
+                    monthKey,
+                    label,
+                    fileSuffix,
+                    filterMode
+                } = getLedgerFilterContext();
                 if (!rows.length) {
-                    showMessage('No ledger data to export for selected month.', 'info');
+                    showMessage('No ledger data to export for the selected view.', 'info');
                     return;
                 }
 
-                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
-                const dateRangeText = `Reference month ${monthKey}`;
-                const pdfBase = await createStyledPdf('Financial Ledger', dateRangeText);
+                const dateRangeText = label;
+                const pdfBase = await createStyledPdf('Financial Ledger', dateRangeText, 'LEDGER TRANSACTION REPORT');
                 if (!pdfBase || !pdfBase.doc || !pdfBase.doc.autoTable) {
                     showMessage('PDF table plugin failed to load.', 'error');
                     return;
@@ -5361,20 +5647,30 @@
                     baseFont
                 } = pdfBase;
 
-                const ledgerTotals = calculateFinancialLedgerTotals(rows, {
+                const totalsOptions = filterMode === 'all-months' || filterMode === 'all-pending' || filterMode === 'salary-partial-all' ? {} : {
                     monthKey
-                });
-                doc.setFont(baseFont, 'bold');
-                doc.setFontSize(10);
-                doc.setTextColor(45, 55, 72);
-                doc.text(`Lending: ${formatUsd(ledgerTotals.totalLending)}    Recovery: ${formatUsd(ledgerTotals.totalRecovery)}    Salary Partial: ${formatUsd(ledgerTotals.totalSalary)}    Net Effect: ${formatUsd(ledgerTotals.netImpact)}`, 24, pdfBase.cursorY);
+                };
+                const ledgerTotals = calculateFinancialLedgerTotals(rows, totalsOptions);
+                const ledgerSummary = {
+                    ...ledgerTotals,
+                    rowCount: rows.length,
+                    viewLabel: label
+                };
+                const titleText = 'Ledger Transactions Report';
+                const ledgerSummaryY = drawLedgerSummaryBox(doc, baseFont, pdfBase.cursorY, ledgerSummary, titleText);
+
+                const typeStyles = {
+                    LENDING: [220, 38, 38],
+                    RECOVERY: [22, 163, 74],
+                    SALARY_PARTIAL: [37, 99, 235]
+                };
 
                 const body = rows.map((item, index) => ({
                     idx: index + 1,
                     date: item.entry_date || '-',
                     type: item.type || '-',
                     originalAmount: item.currency === 'KHR' ?
-                        `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} ៛)` : `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} USD)`,
+                        `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} KHR)` : `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} USD)`,
                     amount: formatUsd(item.amount || 0),
                     refMonth: item.ref_month || '-',
                     person: normalizePdfText(item.person_name || '-'),
@@ -5382,7 +5678,7 @@
                 }));
 
                 doc.autoTable({
-                    startY: pdfBase.cursorY + 12,
+                    startY: ledgerSummaryY,
                     columns: [{
                         header: '#',
                         dataKey: 'idx'
@@ -5411,40 +5707,42 @@
                     body,
                     styles: {
                         font: baseFont,
-                        fontSize: 8,
-                        cellPadding: 4,
+                        fontSize: 8.1,
+                        cellPadding: 4.25,
                         overflow: 'linebreak'
                     },
                     headStyles: {
                         fillColor: [99, 102, 241],
                         textColor: 255,
                         fontStyle: 'bold',
-                        fontSize: 8
+                        fontSize: 8.2
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 249, 252]
+                        fillColor: [246, 248, 252]
                     },
+                    tableLineColor: [226, 232, 240],
+                    tableLineWidth: 0.2,
                     columnStyles: {
                         idx: {
                             cellWidth: 22,
                             halign: 'center'
                         },
                         date: {
-                            cellWidth: 65
+                            cellWidth: 62
                         },
                         type: {
                             cellWidth: 58
                         },
                         originalAmount: {
-                            cellWidth: 80,
+                            cellWidth: 92,
                             halign: 'right'
                         },
                         amount: {
-                            cellWidth: 60,
+                            cellWidth: 62,
                             halign: 'right'
                         },
                         refMonth: {
-                            cellWidth: 55
+                            cellWidth: 54
                         },
                         person: {
                             cellWidth: 'auto',
@@ -5464,11 +5762,26 @@
                             data.cell.styles.font = 'NotoSansKhmer';
                             data.cell.styles.fontStyle = 'normal';
                         }
+                        if (data.section === 'body' && data.column.dataKey === 'type') {
+                            const typeValue = data.row.raw.type || '';
+                            const typeColor = typeStyles[typeValue] || [75, 85, 99];
+                            data.cell.styles.textColor = typeColor;
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                        if (data.section === 'body' && data.column.dataKey === 'status') {
+                            data.cell.styles.textColor = data.row.raw.status === 'completed' ? [22, 163, 74] : [234, 88, 12];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                        if (data.section === 'body' && data.column.dataKey === 'amount') {
+                            const typeValue = data.row.raw.type || '';
+                            const typeColor = typeStyles[typeValue] || [220, 38, 38];
+                            data.cell.styles.textColor = typeColor;
+                        }
                     }
                 });
 
                 addPageNumbers(doc, baseFont);
-                const filename = `theansou_ledger_${monthKey}_${new Date().toISOString().split('T')[0]}.pdf`;
+                const filename = buildPdfFilename(`ledger-${fileSuffix}`);
                 forcePdfDownload(doc, filename);
                 showMessage(`Successfully exported ${rows.length} ledger rows to PDF!`, 'success');
             }
@@ -5815,9 +6128,12 @@
                 const mobileCardsContainer = document.getElementById('ledger-mobile-cards');
                 if (!tableBody || !emptyState || !mobileCardsContainer) return;
 
-                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
-                const filterDropdown = document.getElementById('ledger-view-filter');
-                const filterMode = filterDropdown ? filterDropdown.value : 'selected-month';
+                const {
+                    monthKey,
+                    filterMode,
+                    statusFilter,
+                    rows
+                } = getLedgerFilterContext();
 
                 const monthTotals = calculateFinancialLedgerTotals(financialLedger, {
                     monthKey
@@ -5835,25 +6151,6 @@
                     netImpactEl.className = `text-lg font-bold ${monthTotals.netImpact >= 0 ? 'text-emerald-700' : 'text-red-700'}`;
                 }
 
-                // Filter rows based on filter mode
-                let filteredLedger = [...financialLedger];
-                if (filterMode === 'selected-month') {
-                    filteredLedger = filteredLedger.filter(item => shouldShowLedgerRow(item, monthKey));
-                } else if (filterMode === 'all-pending') {
-                    filteredLedger = filteredLedger.filter(item => item.type === LEDGER_TYPES.LENDING && item.status === 'pending');
-                }
-                // 'all-months' shows all items
-
-                const rows = filteredLedger.sort((a, b) => {
-                    const priorityDiff = getLedgerSortPriority(a) - getLedgerSortPriority(b);
-                    if (priorityDiff !== 0) return priorityDiff;
-                    const aDate = (a.completed_date || a.entry_date || '');
-                    const bDate = (b.completed_date || b.entry_date || '');
-                    if (aDate < bDate) return 1;
-                    if (aDate > bDate) return -1;
-                    return 0;
-                });
-
                 if (rows.length === 0) {
                     tableBody.innerHTML = '';
                     mobileCardsContainer.innerHTML = '';
@@ -5862,6 +6159,15 @@
                         emptyMessage = 'មិនមានទិន្នន័យប្រតិបត្តិការនៅឡើយទេ';
                     } else if (filterMode === 'all-pending') {
                         emptyMessage = 'មិនមានបំណុល pending ទេ';
+                    } else if (filterMode === 'salary-partial-month') {
+                        emptyMessage = 'មិនមានទិន្នន័យ Salary Partial សម្រាប់ខែនេះទេ';
+                    } else if (filterMode === 'salary-partial-all') {
+                        emptyMessage = 'មិនមានទិន្នន័យ Salary Partial នៅឡើយទេ';
+                    }
+                    if (statusFilter === 'pending') {
+                        emptyMessage += ' (Status: pending)';
+                    } else if (statusFilter === 'completed') {
+                        emptyMessage += ' (Status: completed)';
                     }
                     emptyState.innerHTML = `<i class="fas fa-book-open text-4xl mb-2 opacity-50"></i><p>${emptyMessage}</p>`;
                     emptyState.classList.remove('hidden');
@@ -5909,26 +6215,38 @@
                         const contactNote = item.contact_note ? normalizePdfText(item.contact_note) : '-';
                         return `
                         <article class="ledger-mobile-card ${carryOver ? 'ledger-mobile-card-carry' : ''}">
-                            <div class="ledger-mobile-card-head">
-                                <div class="font-bold ${typeColor}">${item.type || '-'}</div>
-                                <div class="text-xs text-gray-500">${item.entry_date || '-'}</div>
+                            <div class="ledger-mobile-top-row">
+                                <div class="ledger-mobile-main">
+                                    <div class="ledger-mobile-amount-row">
+                                        <span class="ledger-mobile-amount">${amountDisplay}</span>
+                                        <span class="ledger-mobile-date">${item.entry_date || '-'}</span>
+                                    </div>
+                                    <div class="ledger-mobile-title-row">
+                                        <span class="ledger-mobile-type ${typeColor}">${item.type || '-'}</span>
+                                        <span class="ledger-mobile-user-badge">${item.person_name || 'Self'}</span>
+                                    </div>
+                                </div>
+                                <div class="ledger-mobile-icon-actions">
+                                    <button class="ledger-mobile-icon-btn ledger-mobile-icon-btn-edit" onclick="editFinancialLedgerEntry('${item.id}')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="ledger-mobile-icon-btn ledger-mobile-icon-btn-delete" onclick="deleteFinancialLedgerEntry('${item.id}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="ledger-mobile-amount">${amountDisplay}</div>
-                            <div class="ledger-mobile-meta">
-                                <span><strong>Status:</strong> ${item.status || '-'}</span>
-                                <span><strong>Person:</strong> ${item.person_name || '-'}</span>
-                                <span><strong>Ref:</strong> ${item.ref_month || '-'}</span>
-                                <span><strong>Note:</strong> ${contactNote}</span>
-                            </div>
-                            <div class="ledger-mobile-actions">
+                            <div class="ledger-mobile-info-row">
+                                <span class="ledger-mobile-ref">Ref: ${item.ref_month || '-'}</span>
                                 ${carryBadge}
+                            </div>
+                            <div class="ledger-mobile-bottom-row">
+                                <span class="ledger-mobile-status-label">Status:</span>
                                 <select class="glass-input rounded-lg text-xs ledger-status-select" onchange="toggleFinancialLedgerStatus('${item.id}', this.value)">
                                     <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>pending</option>
                                     <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>completed</option>
                                 </select>
-                                <button class="ledger-action-btn ledger-action-btn-edit" onclick="editFinancialLedgerEntry('${item.id}')">Edit</button>
-                                <button class="ledger-action-btn ledger-action-btn-delete" onclick="deleteFinancialLedgerEntry('${item.id}')">Delete</button>
                             </div>
+                            <div class="ledger-mobile-note">Note: ${contactNote}</div>
                         </article>`;
                     }).join('');
                 }
@@ -5963,7 +6281,7 @@
                 }
             }
 
-            function saveCurrentMonthSalaryTarget() {
+            async function saveCurrentMonthSalaryTarget() {
                 const monthInput = document.getElementById('ledger-month-focus');
                 const targetInput = document.getElementById('ledger-salary-target');
                 const currencySelect = document.getElementById('ledger-salary-target-currency');
@@ -5980,14 +6298,27 @@
 
                 if (!window.confirm(confirmMsg)) return;
 
+                const previousTarget = salaryTargetsByMonth[monthKey];
                 salaryTargetsByMonth[monthKey] = {
                     amount: amount,
                     currency: currency,
                     timestamp: new Date().toISOString()
                 };
-                saveSalaryTargets();
                 renderLedgerSection();
-                showMessage('Salary target saved.', 'success');
+
+                try {
+                    await saveSalaryTargets();
+                    showMessage('Salary target saved.', 'success');
+                } catch (err) {
+                    console.error('Failed to save salary target:', err);
+                    if (previousTarget) {
+                        salaryTargetsByMonth[monthKey] = previousTarget;
+                    } else {
+                        delete salaryTargetsByMonth[monthKey];
+                    }
+                    renderLedgerSection();
+                    showMessage('Failed to save salary target. Please try again.', 'error');
+                }
             }
 
             async function saveExpense(expenseData) {
@@ -8272,7 +8603,7 @@
                     return;
                 }
 
-                const pdfBase = await createStyledPdf('Financial Report', report.range.label);
+                const pdfBase = await createStyledPdf('Financial Report', report.range.label, 'FINANCIAL REPORT');
                 if (!pdfBase || !pdfBase.doc || !pdfBase.doc.autoTable) {
                     showMessage('PDF table plugin failed to load.', 'error');
                     return;
@@ -8303,8 +8634,8 @@
                         })),
                         styles: {
                             font: baseFont,
-                            fontSize: 7.8,
-                            cellPadding: 3.5,
+                            fontSize: 8.1,
+                            cellPadding: 4.25,
                             valign: 'middle',
                             overflow: 'linebreak'
                         },
@@ -8312,10 +8643,10 @@
                             fillColor: [16, 185, 129],
                             textColor: 255,
                             fontStyle: 'bold',
-                            fontSize: 8
+                            fontSize: 8.2
                         },
                         alternateRowStyles: {
-                            fillColor: [240, 253, 244]
+                            fillColor: [246, 252, 248]
                         },
                         tableLineColor: [220, 234, 220],
                         tableLineWidth: 0.2,
@@ -8352,8 +8683,8 @@
                     })),
                     styles: {
                         font: baseFont,
-                        fontSize: 7.8,
-                        cellPadding: 3.5,
+                            fontSize: 8.1,
+                            cellPadding: 4.25,
                         valign: 'middle',
                         overflow: 'linebreak'
                     },
@@ -8361,10 +8692,10 @@
                         fillColor: [99, 102, 241],
                         textColor: 255,
                         fontStyle: 'bold',
-                        fontSize: 8
+                            fontSize: 8.2
                     },
                     alternateRowStyles: {
-                        fillColor: [248, 249, 252]
+                            fillColor: [246, 248, 252]
                     },
                     tableLineColor: [226, 232, 240],
                     tableLineWidth: 0.2,
@@ -8413,8 +8744,8 @@
                         })),
                         styles: {
                             font: baseFont,
-                            fontSize: 7.6,
-                            cellPadding: 3.5,
+                            fontSize: 8.0,
+                            cellPadding: 4.1,
                             valign: 'middle',
                             overflow: 'linebreak'
                         },
@@ -8422,10 +8753,10 @@
                             fillColor: [239, 68, 68],
                             textColor: 255,
                             fontStyle: 'bold',
-                            fontSize: 8
+                            fontSize: 8.2
                         },
                         alternateRowStyles: {
-                            fillColor: [254, 242, 242]
+                            fillColor: [255, 247, 247]
                         },
                         tableLineColor: [251, 191, 191],
                         tableLineWidth: 0.2,
@@ -9954,6 +10285,18 @@
                 if (ledgerMonthInput) ledgerMonthInput.addEventListener('change', renderLedgerSection);
                 const ledgerViewFilter = document.getElementById('ledger-view-filter');
                 if (ledgerViewFilter) ledgerViewFilter.addEventListener('change', renderLedgerSection);
+                const ledgerStatusFilter = document.getElementById('ledger-status-filter');
+                if (ledgerStatusFilter) ledgerStatusFilter.addEventListener('change', renderLedgerSection);
+                const ledgerFilterClearBtn = document.getElementById('ledger-filter-clear-btn');
+                if (ledgerFilterClearBtn) {
+                    ledgerFilterClearBtn.addEventListener('click', () => {
+                        const monthInput = document.getElementById('ledger-month-focus');
+                        if (monthInput) monthInput.value = getCurrentMonth();
+                        if (ledgerViewFilter) ledgerViewFilter.value = 'selected-month';
+                        if (ledgerStatusFilter) ledgerStatusFilter.value = 'all';
+                        renderLedgerSection();
+                    });
+                }
                 const saveTargetBtn = document.getElementById('ledger-save-target-btn');
                 if (saveTargetBtn) saveTargetBtn.addEventListener('click', saveCurrentMonthSalaryTarget);
                 updateLedgerConvertedAmountPreview();

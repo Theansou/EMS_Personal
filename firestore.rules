@@ -164,6 +164,13 @@ service cloud.firestore {
       // Only admins can delete users
       allow delete: if isAllowedSharedEmail() && isAdmin();
     }
+
+    // ============================================
+    // USER SETTINGS COLLECTION
+    // ============================================
+    match /user_settings/{userId} {
+      allow read, create, update, delete: if isAllowedSharedEmail() && (isOwner(userId) || isAdmin());
+    }
     
     // ============================================
     // EXPENSES COLLECTION
