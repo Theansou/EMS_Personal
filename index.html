@@ -570,6 +570,9 @@
                                 <div class="card-icon"><i class="fas fa-chart-line"></i></div>
                                 <div class="card-label">Net This Month</div>
                                 <div class="card-value" id="dash-net-balance">$0</div>
+                                <div class="text-xs text-gray-400 mt-2">
+                                    Saved: <span id="dash-savings-allocated">$0</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1494,6 +1497,25 @@
                         </div>
                     </div>
 
+                    <!-- Savings Goals Section (Below Expense Breakdown / Pie Chart) -->
+                    <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-3">
+                                <span class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-bullseye text-emerald-600"></i>
+                                </span> គោលដៅសន្សំរបស់ខ្ញុំ (My Savings Goals)
+                            </h3>
+                            <button type="button" id="add-savings-goal-btn" class="btn-pro btn-success w-full md:w-auto justify-center" onclick="openAddSavingsGoalModal()">
+                                <i class="fas fa-plus"></i> បន្ថែមគោលដៅ
+                            </button>
+                        </div>
+
+                        <div id="savings-goals-empty" class="text-sm text-gray-500 text-center py-10">
+                            No savings goals yet. Click (+) to create your first goal.
+                        </div>
+                        <div id="savings-goals-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></div>
+                    </div>
+
                     <!-- Daily Trend Chart -->
                     <div class="chart-card">
                         <h3 class="chart-title"><i class="fas fa-chart-line"></i> Daily Trend (Last 30 Days)</h3>
@@ -2055,6 +2077,206 @@
                 <div class="flex justify-center space-x-3">
                     <button id="cancel-delete-income-btn" class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium transition">Cancel</button>
                     <button id="confirm-delete-income-btn" class="px-5 py-2.5 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium shadow-md transition">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== SAVINGS GOALS: ADD GOAL MODAL ========== -->
+        <div id="add-savings-goal-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+            <div class="glass-panel bg-white/95 p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-100 transition-transform">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-bullseye mr-2 text-emerald-600"></i> Add Savings Goal
+                    </h3>
+                    <button type="button" onclick="closeAddSavingsGoalModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+                </div>
+
+                <form id="add-savings-goal-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Goal Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="savings-goal-name" maxlength="60" placeholder="ឧ. ទិញម៉ូតូថ្មី" class="glass-input w-full rounded-xl text-gray-800" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Target Amount <span class="text-red-500">*</span></label>
+                            <div class="flex gap-2">
+                                <input type="text" inputmode="decimal" pattern="[0-9.]*" id="savings-goal-target" placeholder="0.00" class="glass-input flex-1 rounded-xl text-gray-800 font-semibold" required>
+                                <select id="savings-goal-target-currency" class="glass-input w-28 rounded-xl text-gray-800 cursor-pointer">
+                                    <option value="KHR" selected>KHR (៛)</option>
+                                    <option value="USD">USD ($)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Deadline <span class="text-red-500">*</span></label>
+                            <input type="date" id="savings-goal-deadline" class="glass-input w-full rounded-xl text-gray-800" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Initial Deposit</label>
+                            <div class="flex gap-2">
+                                <input type="text" inputmode="decimal" pattern="[0-9.]*" id="savings-goal-initial" placeholder="0.00" class="glass-input flex-1 rounded-xl text-gray-800 font-semibold">
+                                <select id="savings-goal-initial-currency" class="glass-input w-28 rounded-xl text-gray-800 cursor-pointer">
+                                    <option value="KHR" selected>KHR (៛)</option>
+                                    <option value="USD">USD ($)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
+                            <select id="savings-goal-icon" class="glass-input w-full rounded-xl text-gray-800">
+                                <option value="fa-piggy-bank">Piggy Bank</option>
+                                <option value="fa-motorcycle">Motorcycle</option>
+                                <option value="fa-car">Car</option>
+                                <option value="fa-house">House</option>
+                                <option value="fa-mobile-screen">Phone</option>
+                                <option value="fa-graduation-cap">Education</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" onclick="closeAddSavingsGoalModal()" class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium transition">Cancel</button>
+                        <button type="submit" class="flex-1 py-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 font-bold shadow-md transition">
+                            <i class="fas fa-plus mr-2"></i> Add Goal
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========== SAVINGS GOALS: ADD DEPOSIT MODAL ========== -->
+        <div id="add-savings-deposit-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+            <div class="glass-panel bg-white/95 p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-100 transition-transform">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 id="savings-deposit-modal-title" class="text-lg font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-coins mr-2 text-amber-500"></i> Add Deposit
+                    </h3>
+                    <button type="button" onclick="closeAddSavingsDepositModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+                </div>
+
+                <form id="add-savings-deposit-form" class="space-y-4">
+                    <input type="hidden" id="savings-deposit-goal-id">
+                    <input type="hidden" id="savings-deposit-mode" value="add">
+                    <input type="hidden" id="savings-deposit-index" value="">
+
+                    <div class="rounded-xl bg-amber-50/70 border border-amber-100 px-4 py-3 text-sm text-amber-800">
+                        Goal: <span id="savings-deposit-goal-name" class="font-bold">-</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Amount <span class="text-red-500">*</span></label>
+                            <input type="text" inputmode="decimal" pattern="[0-9.]*" id="savings-deposit-amount" placeholder="0.00" class="glass-input w-full rounded-xl text-gray-800 font-semibold" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Currency <span class="text-red-500">*</span></label>
+                            <select id="savings-deposit-currency" class="glass-input w-full rounded-xl text-gray-800 cursor-pointer" required>
+                                <option value="KHR" selected>KHR (៛)</option>
+                                <option value="USD">USD ($)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date <span class="text-red-500">*</span></label>
+                            <input type="date" id="savings-deposit-date" class="glass-input w-full rounded-xl text-gray-800" required>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" onclick="closeAddSavingsDepositModal()" class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium transition">Cancel</button>
+                        <button id="savings-deposit-submit-btn" type="submit" class="flex-1 py-3 rounded-xl bg-amber-500 text-white hover:bg-amber-600 font-bold shadow-md transition">
+                            <i class="fas fa-plus mr-2"></i> Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ========== SAVINGS GOALS: MANAGE GOAL MODAL ========== -->
+        <div id="manage-savings-goal-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+            <div class="glass-panel bg-white/95 p-6 rounded-2xl shadow-2xl w-full max-w-2xl transform scale-100 transition-transform">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center min-w-0">
+                        <i class="fas fa-sliders mr-2 text-indigo-600"></i>
+                        <span class="truncate">Manage Goal: <span id="manage-savings-goal-name" class="font-bold">-</span></span>
+                    </h3>
+                    <button type="button" onclick="closeManageSavingsGoalModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+                </div>
+
+                <input type="hidden" id="manage-savings-goal-id" value="">
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                    <div class="rounded-xl bg-gray-50/70 border border-gray-200 px-4 py-3">
+                        <div class="text-xs uppercase tracking-wide text-gray-500 font-semibold">Saved</div>
+                        <div id="manage-savings-goal-saved" class="text-lg font-bold text-gray-900">$0.00</div>
+                    </div>
+                    <div class="rounded-xl bg-gray-50/70 border border-gray-200 px-4 py-3">
+                        <div class="text-xs uppercase tracking-wide text-gray-500 font-semibold">Target</div>
+                        <div id="manage-savings-goal-target" class="text-lg font-bold text-gray-900">$0.00</div>
+                    </div>
+                    <div class="rounded-xl bg-gray-50/70 border border-gray-200 px-4 py-3">
+                        <div class="text-xs uppercase tracking-wide text-gray-500 font-semibold">Progress</div>
+                        <div id="manage-savings-goal-progress" class="text-lg font-bold text-gray-900">0%</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+                    <div class="text-sm text-gray-600">
+                        Deposits: <span id="manage-savings-goal-deposit-count" class="font-bold text-gray-900">0</span>
+                    </div>
+                    <div class="manage-savings-actions flex gap-2">
+                        <button type="button" class="btn-pro btn-success" onclick="openAddSavingsDepositModalFromManage()">
+                            <i class="fas fa-plus"></i> <span class="manage-savings-action-text">Add Deposit</span>
+                        </button>
+                        <button type="button" class="btn-pro btn-secondary" onclick="downloadSavingsGoalPdfFromManage()">
+                            <i class="fas fa-file-pdf"></i> <span class="manage-savings-action-text">Download PDF</span>
+                        </button>
+                        <button type="button" class="btn-pro btn-danger" onclick="confirmDeleteSavingsGoalFromManage()">
+                            <i class="fas fa-trash"></i> <span class="manage-savings-action-text">Delete Goal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="savings-deposits-table-wrap">
+                    <table class="min-w-full text-xs md:text-sm savings-deposits-table">
+                        <thead>
+                            <tr class="text-left text-gray-600 border-b border-gray-200">
+                                <th class="px-3 py-3">Date</th>
+                                <th class="px-3 py-3">Amount</th>
+                                <th class="px-3 py-3 savings-col-type">Type</th>
+                                <th class="px-3 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manage-savings-goal-deposits-body">
+                            <tr>
+                                <td colspan="4" class="px-3 py-6 text-center text-gray-500">No deposits yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex gap-3 mt-5">
+                    <button type="button" onclick="closeManageSavingsGoalModal()" class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium transition">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== SAVINGS GOALS: CONFIRM MODAL ========== -->
+        <div id="confirm-savings-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+            <div class="glass-panel bg-white/95 p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-100 transition-transform">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="confirm-savings-title" class="text-lg font-bold text-gray-900">Confirm</h3>
+                    <button type="button" onclick="closeConfirmSavingsModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+                </div>
+                <p id="confirm-savings-message" class="text-sm text-gray-600 mb-5">Are you sure?</p>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeConfirmSavingsModal()" class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 font-medium transition">Cancel</button>
+                    <button id="confirm-savings-confirm-btn" type="button" class="flex-1 py-3 rounded-xl bg-red-600 text-white hover:bg-red-700 font-bold shadow-md transition">
+                        Delete
+                    </button>
                 </div>
             </div>
         </div>
@@ -3489,6 +3711,7 @@
             };
             let incomes = [];
             let financialLedger = [];
+            let savingsGoals = [];
             let editingLedgerEntryId = null;
             let currentIncomeFilters = {
                 source: '',
@@ -3659,7 +3882,12 @@
                     showMessage('Firebase SDK not loaded. Cannot connect to Cloud.', 'error');
                     return;
                 }
-                firebase.initializeApp(firebaseConfig);
+                // Prevent "Firebase App named '[DEFAULT]' already exists" (can happen with hot reload / duplicate script exec).
+                if (!firebase.apps || firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                } else {
+                    firebase.app();
+                }
                 db = firebase.firestore();
                 auth = firebase.auth();
 
@@ -3703,6 +3931,7 @@
                     if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
                     if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
                     if (firestoreUnsubscribe.settings) firestoreUnsubscribe.settings();
+                    if (firestoreUnsubscribe.savingsGoals) firestoreUnsubscribe.savingsGoals();
                     firestoreUnsubscribe = {};
                     // Start new listeners for the current user (each user has their own data)
                     startFirestoreListener(currentUser.uid);
@@ -3719,10 +3948,12 @@
                 expenses = [];
                 incomes = [];
                 financialLedger = [];
+                savingsGoals = [];
                 if (firestoreUnsubscribe.expenses) firestoreUnsubscribe.expenses();
                 if (firestoreUnsubscribe.incomes) firestoreUnsubscribe.incomes();
                 if (firestoreUnsubscribe.ledger) firestoreUnsubscribe.ledger();
                 if (firestoreUnsubscribe.settings) firestoreUnsubscribe.settings();
+                if (firestoreUnsubscribe.savingsGoals) firestoreUnsubscribe.savingsGoals();
                 firestoreUnsubscribe = {};
 
                 if (user) {
@@ -3786,6 +4017,9 @@
                 const ledgerDocsByUid = new Map();
                 const ledgerDocsByEmail = new Map();
                 const ledgerDocsBySharedEmails = new Map();
+                const savingsGoalDocsByUid = new Map();
+                const savingsGoalDocsByEmail = new Map();
+                const savingsGoalDocsBySharedEmails = new Map();
                 const settingsDocRef = db.collection('user_settings').doc(groupId);
 
                 const expenseStreamReady = {
@@ -3820,6 +4054,25 @@
                     const merged = new Map([...ledgerDocsBySharedEmails, ...ledgerDocsByEmail, ...ledgerDocsByUid]);
                     financialLedger = Array.from(merged.values());
                     updateUI();
+                }
+
+                function mergeSavingsGoalDocs() {
+                    const merged = new Map([...savingsGoalDocsBySharedEmails, ...savingsGoalDocsByEmail, ...savingsGoalDocsByUid]);
+                    savingsGoals = Array.from(merged.values()).sort((a, b) => {
+                        const aDue = (a.deadline || '');
+                        const bDue = (b.deadline || '');
+                        if (aDue !== bDue) return aDue.localeCompare(bDue);
+                        return (a.name || '').localeCompare((b.name || ''));
+                    });
+                    if (typeof renderSavingsGoals === 'function') {
+                        renderSavingsGoals();
+                    }
+                    if (typeof refreshManageSavingsGoalModalIfOpen === 'function') {
+                        refreshManageSavingsGoalModalIfOpen();
+                    }
+                    if (typeof updateDashboardOverview === 'function') {
+                        updateDashboardOverview();
+                    }
                 }
 
                 function applySalaryTargetsSnapshot(snapshot) {
@@ -3892,6 +4145,27 @@
                             userEmail: data.userEmail || '',
                             groupId: data.groupId,
                             timestamp: data.timestamp && data.timestamp.toDate ? data.timestamp.toDate() : null
+                        });
+                    });
+                }
+
+                function mapSavingsGoalSnapshot(snapshot, targetMap) {
+                    targetMap.clear();
+                    snapshot.forEach(doc => {
+                        const data = doc.data() || {};
+                        targetMap.set(doc.id, {
+                            id: doc.id,
+                            name: (data.name || '').toString(),
+                            icon: (data.icon || 'fa-piggy-bank').toString(),
+                            targetAmountUsd: Number(data.targetAmountUsd) || 0,
+                            currentSavedUsd: Number(data.currentSavedUsd) || 0,
+                            deadline: (data.deadline || '').toString(),
+                            deposits: Array.isArray(data.deposits) ? data.deposits : [],
+                            userId: data.userId,
+                            userEmail: data.userEmail || '',
+                            groupId: data.groupId,
+                            createdAt: data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate() : data.createdAt) : null,
+                            updatedAt: data.updatedAt ? (data.updatedAt.toDate ? data.updatedAt.toDate() : data.updatedAt) : null
                         });
                     });
                 }
@@ -4175,6 +4449,51 @@
                         });
                 }
 
+                // --- Firestore Query for Savings Goals ---
+                const unsubscribeSavingsGoalsByUid = (useSharedGroup ?
+                        db.collection('savings_goals').where('groupId', '==', SHARED_GROUP_ID) :
+                        db.collection('savings_goals').where('userId', '==', groupId))
+                    .onSnapshot({
+                        includeMetadataChanges: true
+                    }, snapshot => {
+                        mapSavingsGoalSnapshot(snapshot, savingsGoalDocsByUid);
+                        mergeSavingsGoalDocs();
+                    }, err => {
+                        console.error('Firebase savings goals error:', err);
+                        showMessage('Savings goals connection error: ' + err.message, 'error');
+                        mergeSavingsGoalDocs();
+                    });
+
+                let unsubscribeSavingsGoalsByEmail = null;
+                if (!useSharedGroup && currentUserEmail) {
+                    unsubscribeSavingsGoalsByEmail = db.collection('savings_goals')
+                        .where('userEmail', '==', currentUserEmail)
+                        .onSnapshot({
+                            includeMetadataChanges: true
+                        }, snapshot => {
+                            mapSavingsGoalSnapshot(snapshot, savingsGoalDocsByEmail);
+                            mergeSavingsGoalDocs();
+                        }, err => {
+                            console.error('Firebase savings goals email fallback error:', err);
+                            mergeSavingsGoalDocs();
+                        });
+                }
+
+                let unsubscribeSavingsGoalsBySharedEmails = null;
+                if (useSharedGroup) {
+                    unsubscribeSavingsGoalsBySharedEmails = db.collection('savings_goals')
+                        .where('userEmail', 'in', ALLOWED_EMAILS)
+                        .onSnapshot({
+                            includeMetadataChanges: true
+                        }, snapshot => {
+                            mapSavingsGoalSnapshot(snapshot, savingsGoalDocsBySharedEmails);
+                            mergeSavingsGoalDocs();
+                        }, err => {
+                            console.error('Firebase savings goals shared-email fallback error:', err);
+                            mergeSavingsGoalDocs();
+                        });
+                }
+
                 const unsubscribeSettings = settingsDocRef.onSnapshot({
                     includeMetadataChanges: true
                 }, snapshot => {
@@ -4208,6 +4527,12 @@
                 firestoreUnsubscribe.settings = () => {
                     unsubscribeSettings();
                 };
+
+                firestoreUnsubscribe.savingsGoals = () => {
+                    unsubscribeSavingsGoalsByUid();
+                    if (unsubscribeSavingsGoalsByEmail) unsubscribeSavingsGoalsByEmail();
+                    if (unsubscribeSavingsGoalsBySharedEmails) unsubscribeSavingsGoalsBySharedEmails();
+                };
             }
 
 
@@ -4220,6 +4545,14 @@
                 const rates = getCurrencyRates();
                 const rate = rates[currency] || 1;
                 return currency === 'USD' ? numAmount : numAmount / rate;
+            }
+
+            function convertFromUSD(amountUsd, currency) {
+                const numAmount = parseFloat(amountUsd);
+                if (isNaN(numAmount) || numAmount === 0) return 0;
+                const rates = getCurrencyRates();
+                const rate = rates[currency] || 1;
+                return currency === 'USD' ? numAmount : numAmount * rate;
             }
 
             function formatUSD(amount) {
@@ -6325,16 +6658,43 @@
                 if (!db) return showMessage('Database not connected.', 'error');
                 if (!currentUser) return showMessage('Error: You must be signed in to save an expense.', 'error');
 
-                const normalizedCategory = normalizeCategoryName(expenseData.category);
+                const isNew = !expenseData.id;
+                let existingExpenseData = null;
+                let isLinkedSavingsExpense = false;
+
+                if (!isNew) {
+                    try {
+                        const existingSnap = await db.collection('expenses').doc(expenseData.id).get();
+                        existingExpenseData = existingSnap.exists ? (existingSnap.data() || {}) : null;
+                        isLinkedSavingsExpense = !!(existingExpenseData && (existingExpenseData.isSavingsGoalDeposit || existingExpenseData.savingsGoalId || existingExpenseData.savingsDepositId));
+                    } catch (err) {
+                        console.error('Failed to load existing expense before save:', err);
+                    }
+                }
+
+                const normalizedCategory = isLinkedSavingsExpense
+                    ? (normalizeCategoryName('Savings') || 'Savings')
+                    : normalizeCategoryName(expenseData.category);
                 if (!normalizedCategory) return showMessage('Category is required.', 'error');
 
-                const isNew = !expenseData.id;
                 const submitBtn = document.getElementById('submit-button');
                 const originalText = submitBtn.textContent;
 
                 // Show saving state
                 submitBtn.classList.add('btn-saving');
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+                // Savings-goal linked expenses must be edited from Savings Goals (single source of truth).
+                if (!isNew && isLinkedSavingsExpense) {
+                    const goalName = existingExpenseData ? guessSavingsGoalNameFromExpense(existingExpenseData) : '';
+                    submitBtn.classList.remove('btn-saving');
+                    submitBtn.textContent = originalText;
+                    showMessage(`This expense is linked to Savings Goal${goalName ? `: ${goalName}` : ''}. Please edit it from Savings Goals.`, 'info');
+                    if (existingExpenseData && existingExpenseData.savingsGoalId) {
+                        openManageSavingsGoalModal(String(existingExpenseData.savingsGoalId));
+                    }
+                    return;
+                }
 
                 const dataToSave = {
                     amount: parseFloat(expenseData.amount),
@@ -6375,8 +6735,24 @@
                 if (!db) return showMessage('Database not connected.', 'error');
                 if (!currentUser) return showMessage('Error: You must be signed in to delete an expense.', 'error');
                 try {
-                    await db.collection('expenses').doc(id).delete();
-                    showMessage("Expense deleted successfully!", 'success');
+                    const expenseRef = db.collection('expenses').doc(id);
+                    const snap = await expenseRef.get();
+                    const data = snap.exists ? (snap.data() || {}) : {};
+                    const isLinked = !!(data && (data.isSavingsGoalDeposit || data.savingsGoalId || data.savingsDepositId));
+                    const goalId = data && data.savingsGoalId ? String(data.savingsGoalId) : '';
+                    const depositId = data && data.savingsDepositId ? String(data.savingsDepositId) : '';
+
+                    if (isLinked) {
+                        const goalName = guessSavingsGoalNameFromExpense(data);
+                        showMessage(`This expense is linked to Savings Goal${goalName ? `: ${goalName}` : ''}. Please delete it from Savings Goals.`, 'info');
+                        if (goalId) {
+                            openManageSavingsGoalModal(String(goalId));
+                        }
+                        return;
+                    }
+
+                    await expenseRef.delete();
+                    showMessage('Expense deleted successfully!', 'success');
                 } catch (err) {
                     console.error("Firestore delete error:", err);
                     showMessage('Error: ' + err.message, 'error');
@@ -6913,15 +7289,15 @@
                             <div class="flex items-center gap-2 mt-1 flex-wrap">
                                 <span class="text-sm font-semibold text-gray-700 card-category">${expense.category}</span>
                                 <span class="text-xs font-medium text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full card-user-badge">${expense.user || 'Self'}</span>
+                                ${isSavingsLinkedExpense(expense) ? '<span class="text-xs font-medium text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Goal: ' + (guessSavingsGoalNameFromExpense(expense) || 'Savings Goal') + '</span>' : ''}
                             </div>
                         </div>
                         <div class="flex gap-1.5 ml-2 flex-shrink-0 card-actions">
-                            <button onclick="editExpense('${expense.id}')" class="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2.5 rounded-xl text-sm transition-colors" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button onclick="showDeleteModal('${expense.id}')" class="bg-red-100 hover:bg-red-200 text-red-600 p-2.5 rounded-xl text-sm transition-colors" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            ${isSavingsLinkedExpense(expense)
+                                ? '<button onclick="openManageSavingsGoalModal(\'' + (expense.savingsGoalId || '') + '\')" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 p-2.5 rounded-xl text-sm transition-colors" title="Edit in Goal"><i class="fas fa-pen-to-square"></i></button>'
+                                : '<button onclick="editExpense(\'' + expense.id + '\')" class="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2.5 rounded-xl text-sm transition-colors" title="Edit"><i class="fas fa-edit"></i></button>' +
+                                  '<button onclick="showDeleteModal(\'' + expense.id + '\')" class="bg-red-100 hover:bg-red-200 text-red-600 p-2.5 rounded-xl text-sm transition-colors" title="Delete"><i class="fas fa-trash"></i></button>'
+                            }
                         </div>
                     </div>
                     ${renderCardDescription(expense.description)}
@@ -6955,11 +7331,17 @@
                 <td class="px-4 py-3 text-sm text-gray-800">${expense.date}</td>
                 <td class="px-4 py-3 text-sm font-bold" style="color: #2D3748;">${formatUSD(convertToUSD(expense.amount, expense.currency))} <span class="text-xs text-gray-500 font-normal">(${parseFloat(expense.amount).toFixed(2)} ${expense.currency})</span></td>
                 <td class="px-4 py-3 text-sm text-gray-800"><span class="bg-indigo-100/50 text-indigo-800 px-2 py-1 rounded-md text-xs font-semibold border border-indigo-200">${expense.category}</span></td>
-                <td class="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">${expense.description || '-'}</td>
+                <td class="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
+                    ${expense.description || '-'}
+                    ${isSavingsLinkedExpense(expense) ? '<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">Goal: ' + (guessSavingsGoalNameFromExpense(expense) || 'Savings Goal') + '</span>' : ''}
+                </td>
                 <td class="px-4 py-3 text-sm text-gray-800 font-medium">${expense.user || 'Self'}</td>
                 <td class="px-4 py-3 text-right text-sm space-x-2">
-                    <button onclick="editExpense('${expense.id}')" class="text-indigo-600 hover:text-indigo-800 font-medium hover:underline">Edit</button>
-                    <button onclick="showDeleteModal('${expense.id}')" class="text-red-500 hover:text-red-700 font-medium hover:underline">Delete</button>
+                    ${isSavingsLinkedExpense(expense)
+                        ? '<button onclick="openManageSavingsGoalModal(\'' + (expense.savingsGoalId || '') + '\')" class="text-emerald-700 hover:text-emerald-900 font-semibold hover:underline">Edit (Goal)</button>'
+                        : '<button onclick="editExpense(\'' + expense.id + '\')" class="text-indigo-600 hover:text-indigo-800 font-medium hover:underline">Edit</button>' +
+                          '<button onclick="showDeleteModal(\'' + expense.id + '\')" class="text-red-500 hover:text-red-700 font-medium hover:underline">Delete</button>'
+                    }
                 </td>
                 </tr>
             `).join('');
@@ -7223,6 +7605,15 @@
             // Modal & Form 
             // ---------------------------
             function showDeleteModal(id) {
+                const expense = (expenses || []).find(e => e && e.id === id);
+                if (expense && typeof isSavingsLinkedExpense === 'function' && isSavingsLinkedExpense(expense)) {
+                    const goalName = typeof guessSavingsGoalNameFromExpense === 'function' ? guessSavingsGoalNameFromExpense(expense) : '';
+                    showMessage(`This expense is linked to Savings Goal${goalName ? `: ${goalName}` : ''}. Please delete it from Savings Goals.`, 'info');
+                    if (expense.savingsGoalId) {
+                        openManageSavingsGoalModal(String(expense.savingsGoalId));
+                    }
+                    return;
+                }
                 deleteId = id;
                 const modal = document.getElementById('delete-modal');
                 modal.classList.remove('hidden');
@@ -7897,6 +8288,15 @@
             window.editExpense = (id) => {
                 const expense = expenses.find(e => e.id === id);
                 if (!expense) return showMessage("Expense not found in cloud data.", 'error');
+
+                if (typeof isSavingsLinkedExpense === 'function' && isSavingsLinkedExpense(expense)) {
+                    const goalName = typeof guessSavingsGoalNameFromExpense === 'function' ? guessSavingsGoalNameFromExpense(expense) : '';
+                    showMessage(`This expense is linked to Savings Goal${goalName ? `: ${goalName}` : ''}. Please edit it from Savings Goals.`, 'info');
+                    if (expense.savingsGoalId) {
+                        openManageSavingsGoalModal(String(expense.savingsGoalId));
+                    }
+                    return;
+                }
 
                 ensureManagedCategory(expense.category);
                 populateCategories();
@@ -10935,6 +11335,1015 @@
             document.addEventListener('DOMContentLoaded', initFAB);
 
             // ============================================
+            // SAVINGS GOALS (Analytics Tab)
+            // ============================================
+
+            const SAVINGS_GOALS_COLLECTION = 'savings_goals';
+            const SAVINGS_GOAL_MAX_DEPOSITS = 200;
+            let pendingSavingsConfirmAction = null;
+            let savingsReturnToManageGoalId = null;
+
+            function normalizeIsoDate(value) {
+                if (!value) return '';
+                const s = String(value).trim();
+                return s.length >= 10 ? s.slice(0, 10) : s;
+            }
+
+            function generateSavingsDepositId() {
+                const now = Date.now().toString(36);
+                const rand = Math.random().toString(36).slice(2, 10);
+                return `dep_${now}_${rand}`;
+            }
+
+            function normalizeSavingsDeposits(rawDeposits) {
+                const deposits = Array.isArray(rawDeposits) ? rawDeposits : [];
+                return deposits
+                    .map(d => ({
+                        id: (d && d.id) ? String(d.id) : generateSavingsDepositId(),
+                        expenseId: (d && d.expenseId) ? String(d.expenseId) : '',
+                        amount: Number(d && d.amount) || (Number(d && d.amountUsd) || 0),
+                        currency: (d && d.currency) ? (String(d.currency).toUpperCase() === 'KHR' ? 'KHR' : 'USD') : 'USD',
+                        amountUsd: Number(d && d.amountUsd) || 0,
+                        date: normalizeIsoDate(d && d.date),
+                        kind: (d && d.kind) ? String(d.kind) : 'deposit'
+                    }))
+                    .filter(d => Number.isFinite(d.amountUsd) && d.amountUsd > 0 && !!d.date);
+            }
+
+            function sumSavingsDepositsUsd(deposits) {
+                return (deposits || []).reduce((acc, d) => acc + (Number(d.amountUsd) || 0), 0);
+            }
+
+            function parseDecimalInput(value) {
+                const raw = (value || '').toString().replace(/,/g, '').trim();
+                const n = parseFloat(raw);
+                return Number.isFinite(n) ? n : 0;
+            }
+
+            function buildSavingsLinkedExpensePayload(goal, deposit) {
+                const savingsCategory = normalizeCategoryName('Savings') || 'Savings';
+                ensureManagedCategory(savingsCategory);
+                const goalName = (goal && goal.name ? String(goal.name) : '').trim();
+                const description = goalName ? `Savings: ${goalName}` : 'Savings deposit';
+                const preferredSavingsUserName = 'Theansou';
+                const activeUsers = (typeof getActiveManagedUserNames === 'function') ? getActiveManagedUserNames() : [];
+                const hasPreferred = activeUsers.some(name => String(name || '').toLowerCase() === preferredSavingsUserName.toLowerCase());
+                const defaultUserName = hasPreferred
+                    ? preferredSavingsUserName
+                    : ((typeof getAutoSelectedUser === 'function' ? getAutoSelectedUser() : '') || 'Self');
+
+                return {
+                    amount: Number(deposit && deposit.amount) || (Number(deposit && deposit.amountUsd) || 0),
+                    currency: (deposit && deposit.currency) ? (String(deposit.currency).toUpperCase() === 'KHR' ? 'KHR' : 'USD') : 'USD',
+                    date: normalizeIsoDate(deposit && deposit.date),
+                    category: savingsCategory,
+                    description,
+                    user: defaultUserName,
+                    userId: currentUser.uid,
+                    userEmail: (currentUser.email || '').toLowerCase(),
+                    groupId: getActiveGroupId(),
+                    // link metadata (safe extra fields)
+                    savingsGoalId: goal && goal.id ? goal.id : '',
+                    savingsDepositId: deposit && deposit.id ? deposit.id : '',
+                    isSavingsGoalDeposit: true,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+            }
+
+            function isSavingsLinkedExpense(expense) {
+                return !!(expense && (expense.isSavingsGoalDeposit || expense.savingsGoalId || expense.savingsDepositId));
+            }
+
+            function getSavingsGoalNameById(goalId) {
+                const id = String(goalId || '').trim();
+                if (!id) return '';
+                const goal = (savingsGoals || []).find(g => g && g.id === id);
+                return goal && goal.name ? String(goal.name) : '';
+            }
+
+            function guessSavingsGoalNameFromExpense(expense) {
+                if (!expense) return '';
+                const direct = getSavingsGoalNameById(expense.savingsGoalId);
+                if (direct) return direct;
+                const desc = (expense.description || '').toString();
+                const match = desc.match(/^\\s*Savings\\s*:\\s*(.+)\\s*$/i);
+                return match ? match[1].trim() : '';
+            }
+
+            function openSavingsGoalFromExpense(expenseId) {
+                const exp = (expenses || []).find(e => e && e.id === expenseId);
+                if (!exp) return showMessage('Expense not found.', 'error');
+                if (!isSavingsLinkedExpense(exp) || !exp.savingsGoalId) {
+                    return showMessage('This expense is not linked to a savings goal.', 'info');
+                }
+                openManageSavingsGoalModal(String(exp.savingsGoalId));
+            }
+
+            function openConfirmSavingsModal({ title, message, confirmText, confirmClass, onConfirm }) {
+                const modal = document.getElementById('confirm-savings-modal');
+                const titleEl = document.getElementById('confirm-savings-title');
+                const messageEl = document.getElementById('confirm-savings-message');
+                const confirmBtn = document.getElementById('confirm-savings-confirm-btn');
+                if (!modal || !confirmBtn) return;
+
+                pendingSavingsConfirmAction = typeof onConfirm === 'function' ? onConfirm : null;
+                if (titleEl) titleEl.textContent = title || 'Confirm';
+                if (messageEl) messageEl.textContent = message || 'Are you sure?';
+                confirmBtn.textContent = confirmText || 'Confirm';
+
+                confirmBtn.className = confirmBtn.className
+                    .replace(/bg-(red|amber|emerald|indigo|blue|gray)-\d+/g, '')
+                    .replace(/hover:bg-(red|amber|emerald|indigo|blue|gray)-\d+/g, '');
+                if (confirmClass) {
+                    confirmBtn.classList.add(...String(confirmClass).split(' ').filter(Boolean));
+                } else {
+                    confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeConfirmSavingsModal() {
+                const modal = document.getElementById('confirm-savings-modal');
+                if (!modal) return;
+                pendingSavingsConfirmAction = null;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            function calculateDailySavingNeeded(targetAmountUsd, currentSavedUsd, deadlineIsoDate) {
+                const target = Number(targetAmountUsd) || 0;
+                const current = Number(currentSavedUsd) || 0;
+                const remaining = Math.max(0, target - current);
+
+                const deadline = new Date(normalizeIsoDate(deadlineIsoDate));
+                if (Number.isNaN(deadline.getTime())) {
+                    return { daysRemaining: 0, dailyNeeded: 0 };
+                }
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                deadline.setHours(0, 0, 0, 0);
+
+                const msRemaining = deadline.getTime() - today.getTime();
+                const daysRemaining = Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
+                const dailyNeeded = daysRemaining > 0 ? remaining / daysRemaining : remaining;
+                return { daysRemaining, dailyNeeded };
+            }
+
+            function getSavingsAllocatedForMonth(monthKey) {
+                const key = String(monthKey || '').trim();
+                if (!key) return 0;
+                let total = 0;
+                const savingsCategory = normalizeCategoryName('Savings') || 'Savings';
+                (expenses || []).forEach(exp => {
+                    const date = normalizeIsoDate(exp && exp.date);
+                    if (!date || !date.startsWith(key)) return;
+                    const cat = normalizeCategoryName(exp && exp.category);
+                    if (cat !== savingsCategory) return;
+                    total += convertToUSD(exp.amount || 0, exp.currency || 'USD');
+                });
+                return total;
+            }
+
+            function renderSavingsGoals() {
+                const emptyEl = document.getElementById('savings-goals-empty');
+                const listEl = document.getElementById('savings-goals-list');
+                if (!emptyEl || !listEl) return;
+
+                const goals = Array.isArray(savingsGoals) ? savingsGoals : [];
+                if (goals.length === 0) {
+                    emptyEl.classList.remove('hidden');
+                    listEl.classList.add('hidden');
+                    listEl.innerHTML = '';
+                    return;
+                }
+
+                emptyEl.classList.add('hidden');
+                listEl.classList.remove('hidden');
+
+                listEl.innerHTML = goals.map(goal => {
+                    const goalCurrency = (String(goal.targetCurrency || 'USD').toUpperCase() === 'KHR') ? 'KHR' : 'USD';
+                    const targetUsd = Number(goal.targetAmountUsd) || 0;
+                    const targetOriginal = goalCurrency === 'KHR'
+                        ? (Number(goal.targetOriginalAmount) || Math.round(convertFromUSD(targetUsd, 'KHR')))
+                        : targetUsd;
+                    const deposits = normalizeSavingsDeposits(goal.deposits);
+                    const saved = deposits.length > 0 ? sumSavingsDepositsUsd(deposits) : (Number(goal.currentSavedUsd) || 0);
+                    const savedOriginal = goalCurrency === 'KHR' ? Math.round(convertFromUSD(saved, 'KHR')) : saved;
+                    const pct = targetUsd > 0 ? Math.min(100, Math.max(0, (saved / targetUsd) * 100)) : 0;
+                    const due = normalizeIsoDate(goal.deadline);
+                    const calc = calculateDailySavingNeeded(targetUsd, saved, due);
+                    const isDone = targetUsd > 0 && saved >= targetUsd;
+
+                    let insightText = '';
+                    if (isDone) {
+                        insightText = 'សម្រេចរួចរាល់! (Goal achieved)';
+                    } else if (!due) {
+                        insightText = 'Set a deadline to get daily insight.';
+                    } else if (calc.daysRemaining <= 0) {
+                        const remainingUsd = Math.max(0, targetUsd - saved);
+                        const remainingDisplay = goalCurrency === 'KHR'
+                            ? formatCurrency(Math.max(0, Math.round(convertFromUSD(remainingUsd, 'KHR'))), 'KHR')
+                            : formatUSD(remainingUsd);
+                        insightText = `Deadline reached — remaining: ${remainingDisplay}`;
+                    } else {
+                        const dailyDisplay = goalCurrency === 'KHR'
+                            ? formatCurrency(Math.max(0, Math.round(convertFromUSD(calc.dailyNeeded, 'KHR'))), 'KHR')
+                            : formatUSD(calc.dailyNeeded);
+                        insightText = `អ្នកត្រូវសន្សំ ${dailyDisplay} ក្នុង ១ ថ្ងៃទៀត ដើម្បីសម្រេចគោលដៅ`;
+                    }
+
+                    const savedLine = goalCurrency === 'KHR' ? formatCurrency(savedOriginal, 'KHR') : formatUSD(saved);
+                    const targetLine = goalCurrency === 'KHR' ? formatCurrency(targetOriginal, 'KHR') : formatUSD(targetUsd);
+
+                    return `
+                        <div class="glass-card savings-goal-card">
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="savings-goal-icon">
+                                        <i class="fas ${goal.icon || 'fa-piggy-bank'}"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-gray-800 truncate">${(goal.name || 'Untitled Goal')}</div>
+                                        <div class="text-xs text-gray-500 mt-0.5">${pct.toFixed(0)}% &bull; ${savedLine} / ${targetLine}</div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 flex-shrink-0">
+                                    <button type="button" class="btn-pro btn-outline px-2 py-1.5 text-xs whitespace-nowrap" onclick="openAddSavingsDepositModal('${goal.id}')">
+                                        <i class="fas fa-plus mr-1"></i><span class="hidden sm:inline">Deposit</span>
+                                    </button>
+                                    <button type="button" class="btn-pro btn-outline px-2 py-1.5 text-xs whitespace-nowrap" onclick="openManageSavingsGoalModal('${goal.id}')">
+                                        <i class="fas fa-pen-to-square mr-1"></i><span class="hidden sm:inline">Manage</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="savings-progress-track" aria-label="Progress">
+                                <div class="savings-progress-bar" style="width:${pct.toFixed(2)}%"></div>
+                            </div>
+
+                            <div class="mt-3 text-xs text-gray-500 savings-goal-insight">${insightText}</div>
+                            <div class="mt-2 text-xs text-gray-400">Deadline: <span class="font-semibold">${due || '-'}</span></div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function openAddSavingsGoalModal() {
+                const modal = document.getElementById('add-savings-goal-modal');
+                const form = document.getElementById('add-savings-goal-form');
+                const nameInput = document.getElementById('savings-goal-name');
+                const deadlineInput = document.getElementById('savings-goal-deadline');
+                const targetCurrency = document.getElementById('savings-goal-target-currency');
+                const initialCurrency = document.getElementById('savings-goal-initial-currency');
+                if (!modal || !form) return;
+
+                form.reset();
+                if (targetCurrency) targetCurrency.value = 'KHR';
+                if (initialCurrency) initialCurrency.value = 'KHR';
+
+                if (deadlineInput) {
+                    const d = new Date();
+                    d.setDate(d.getDate() + 30);
+                    deadlineInput.value = d.toISOString().slice(0, 10);
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                if (nameInput) setTimeout(() => nameInput.focus(), 0);
+            }
+
+            function closeAddSavingsGoalModal() {
+                const modal = document.getElementById('add-savings-goal-modal');
+                if (!modal) return;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            async function handleAddSavingsGoalSubmit(event) {
+                event.preventDefault();
+                if (!db || !currentUser) return;
+
+                const name = (document.getElementById('savings-goal-name')?.value || '').trim();
+                const target = parseDecimalInput(document.getElementById('savings-goal-target')?.value || '');
+                const targetCurrency = (document.getElementById('savings-goal-target-currency')?.value || 'KHR').toUpperCase() === 'USD' ? 'USD' : 'KHR';
+                const deadline = normalizeIsoDate(document.getElementById('savings-goal-deadline')?.value || '');
+                const initial = parseDecimalInput(document.getElementById('savings-goal-initial')?.value || '');
+                const initialCurrency = (document.getElementById('savings-goal-initial-currency')?.value || 'KHR').toUpperCase() === 'USD' ? 'USD' : 'KHR';
+                const icon = (document.getElementById('savings-goal-icon')?.value || 'fa-piggy-bank').trim();
+
+                if (!name) return showMessage('Goal name is required.', 'error');
+                if (!Number.isFinite(target) || target <= 0) return showMessage('Target amount must be greater than 0.', 'error');
+                if (!deadline) return showMessage('Deadline is required.', 'error');
+                if (!Number.isFinite(initial) || initial < 0) return showMessage('Initial deposit must be 0 or more.', 'error');
+
+                const todayIso = new Date().toISOString().slice(0, 10);
+                const targetUsd = convertToUSD(target, targetCurrency);
+                const initialUsd = convertToUSD(initial, initialCurrency);
+                const deposits = initial > 0 ? [{
+                    id: generateSavingsDepositId(),
+                    amountUsd: initial,
+                    date: todayIso,
+                    kind: 'initial'
+                }] : [];
+
+                const currentUserEmail = normalizeEmail(currentUser.email || '');
+                const useSharedGroup = isAllowedSharedEmail(currentUserEmail);
+
+                const payload = {
+                    name,
+                    icon,
+                    targetAmountUsd: targetUsd,
+                    targetOriginalAmount: target,
+                    targetCurrency: targetCurrency,
+                    currentSavedUsd: initialUsd,
+                    deadline,
+                    deposits: deposits.map(d => ({
+                        ...d,
+                        amount: initial,
+                        currency: initialCurrency,
+                        amountUsd: initialUsd
+                    })),
+                    userId: currentUser.uid,
+                    userEmail: currentUserEmail,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                if (useSharedGroup) {
+                    payload.groupId = SHARED_GROUP_ID;
+                }
+
+                try {
+                    await db.collection(SAVINGS_GOALS_COLLECTION).add(payload);
+                    closeAddSavingsGoalModal();
+                    showMessage('Savings goal added!', 'success');
+                } catch (err) {
+                    console.error('Add savings goal failed:', err);
+                    showMessage('Failed to add savings goal. Please try again.', 'error');
+                }
+            }
+
+            function openAddSavingsDepositModal(goalId, options = {}) {
+                const modal = document.getElementById('add-savings-deposit-modal');
+                const form = document.getElementById('add-savings-deposit-form');
+                const goalIdInput = document.getElementById('savings-deposit-goal-id');
+                const modeInput = document.getElementById('savings-deposit-mode');
+                const indexInput = document.getElementById('savings-deposit-index');
+                const titleEl = document.getElementById('savings-deposit-modal-title');
+                const submitBtn = document.getElementById('savings-deposit-submit-btn');
+                const goalNameEl = document.getElementById('savings-deposit-goal-name');
+                const amountInput = document.getElementById('savings-deposit-amount');
+                const currencySelect = document.getElementById('savings-deposit-currency');
+                const dateInput = document.getElementById('savings-deposit-date');
+
+                if (!modal || !form || !goalIdInput) return;
+
+                savingsReturnToManageGoalId = (options && options.returnToManageGoalId) ? String(options.returnToManageGoalId) : null;
+
+                const goal = (savingsGoals || []).find(g => g.id === goalId);
+                goalIdInput.value = goalId || '';
+                if (goalNameEl) goalNameEl.textContent = goal ? (goal.name || '-') : '-';
+
+                form.reset();
+                goalIdInput.value = goalId || '';
+                if (modeInput) modeInput.value = 'add';
+                if (indexInput) indexInput.value = '';
+                if (titleEl) titleEl.innerHTML = '<i class="fas fa-coins mr-2 text-amber-500"></i> Add Deposit';
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-plus mr-2"></i> Add Deposit';
+                if (currencySelect) currencySelect.value = 'KHR';
+
+                if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                if (amountInput) setTimeout(() => amountInput.focus(), 0);
+            }
+
+            function closeAddSavingsDepositModal() {
+                const modal = document.getElementById('add-savings-deposit-modal');
+                if (!modal) return;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+
+                const returnGoalId = savingsReturnToManageGoalId;
+                savingsReturnToManageGoalId = null;
+                if (returnGoalId) {
+                    setTimeout(() => openManageSavingsGoalModal(returnGoalId), 0);
+                }
+            }
+
+            async function handleAddSavingsDepositSubmit(event) {
+                event.preventDefault();
+                if (!db || !currentUser) return;
+
+                const goalId = (document.getElementById('savings-deposit-goal-id')?.value || '').trim();
+                const mode = (document.getElementById('savings-deposit-mode')?.value || 'add').trim();
+                const indexRaw = (document.getElementById('savings-deposit-index')?.value || '').trim();
+                const amount = parseDecimalInput(document.getElementById('savings-deposit-amount')?.value || '');
+                const currency = (document.getElementById('savings-deposit-currency')?.value || 'KHR').toUpperCase() === 'USD' ? 'USD' : 'KHR';
+                const date = normalizeIsoDate(document.getElementById('savings-deposit-date')?.value || '');
+
+                if (!goalId) return showMessage('Goal not found.', 'error');
+                if (!Number.isFinite(amount) || amount <= 0) return showMessage('Deposit amount must be greater than 0.', 'error');
+                if (!date) return showMessage('Deposit date is required.', 'error');
+                const amountUsd = convertToUSD(amount, currency);
+
+                const goalRef = db.collection(SAVINGS_GOALS_COLLECTION).doc(goalId);
+
+                try {
+                    await db.runTransaction(async (tx) => {
+                        const snap = await tx.get(goalRef);
+                        if (!snap.exists) {
+                            throw new Error('Goal does not exist.');
+                        }
+                        const data = snap.data() || {};
+                        const goal = {
+                            id: snap.id,
+                            name: (data.name || '').toString(),
+                            targetAmountUsd: Number(data.targetAmountUsd) || 0,
+                            deadline: (data.deadline || '').toString()
+                        };
+                        const targetAmount = goal.targetAmountUsd;
+                        const existingDeposits = normalizeSavingsDeposits(data.deposits);
+
+                        let nextDeposits = [...existingDeposits];
+                        if (mode === 'edit') {
+                            const index = Number(indexRaw);
+                            if (!Number.isFinite(index) || index < 0 || index >= nextDeposits.length) {
+                                throw new Error('Deposit not found.');
+                            }
+                            const current = nextDeposits[index];
+                            const depositId = current.id || generateSavingsDepositId();
+                            let expenseId = current.expenseId || '';
+
+                            if (expenseId) {
+                                const expenseRef = db.collection('expenses').doc(expenseId);
+                                const expenseSnap = await tx.get(expenseRef);
+                                if (expenseSnap.exists) {
+                                    tx.update(expenseRef, {
+                                        amount: amount,
+                                        currency: currency,
+                                        date: date,
+                                        category: normalizeCategoryName('Savings') || 'Savings',
+                                        description: (goal.name || '').trim() ? `Savings: ${(goal.name || '').trim()}` : 'Savings deposit',
+                                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                    });
+                                } else {
+                                    const expensePayload = buildSavingsLinkedExpensePayload(goal, {
+                                        id: depositId,
+                                        amount: amount,
+                                        currency: currency,
+                                        amountUsd: amountUsd,
+                                        date
+                                    });
+                                    tx.set(expenseRef, expensePayload);
+                                }
+                            } else {
+                                const expenseRef = db.collection('expenses').doc();
+                                expenseId = expenseRef.id;
+                                const expensePayload = buildSavingsLinkedExpensePayload(goal, {
+                                    id: depositId,
+                                    amount: amount,
+                                    currency: currency,
+                                    amountUsd: amountUsd,
+                                    date
+                                });
+                                tx.set(expenseRef, expensePayload);
+                            }
+
+                            nextDeposits[index] = {
+                                ...current,
+                                id: depositId,
+                                expenseId,
+                                amount,
+                                currency,
+                                amountUsd: amountUsd,
+                                date
+                            };
+                        } else {
+                            const depositId = generateSavingsDepositId();
+                            const expenseRef = db.collection('expenses').doc();
+                            const expenseId = expenseRef.id;
+                            const depositEntry = {
+                                id: depositId,
+                                expenseId,
+                                amount,
+                                currency,
+                                amountUsd: amountUsd,
+                                date,
+                                kind: 'deposit'
+                            };
+                            const expensePayload = buildSavingsLinkedExpensePayload(goal, depositEntry);
+                            tx.set(expenseRef, expensePayload);
+
+                            nextDeposits.push(depositEntry);
+                            if (nextDeposits.length > SAVINGS_GOAL_MAX_DEPOSITS) {
+                                const overflow = nextDeposits.length - SAVINGS_GOAL_MAX_DEPOSITS;
+                                const removed = nextDeposits.splice(0, overflow);
+                                removed.forEach(r => {
+                                    if (r && r.expenseId) {
+                                        tx.delete(db.collection('expenses').doc(String(r.expenseId)));
+                                    }
+                                });
+                            }
+                        }
+
+                        const nextSaved = sumSavingsDepositsUsd(nextDeposits);
+
+                        tx.update(goalRef, {
+                            currentSavedUsd: nextSaved,
+                            deposits: nextDeposits,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastDepositAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            achievedAt: (targetAmount > 0 && nextSaved >= targetAmount) ? firebase.firestore.FieldValue.serverTimestamp() : null
+                        });
+                    });
+
+                    closeAddSavingsDepositModal();
+                    showMessage(mode === 'edit' ? 'Deposit updated!' : 'Deposit added!', 'success');
+                } catch (err) {
+                    console.error('Savings deposit save failed:', err);
+                    showMessage(err && err.message ? err.message : 'Failed to save deposit. Please try again.', 'error');
+                }
+            }
+
+            function getSavingsGoalById(goalId) {
+                const id = String(goalId || '').trim();
+                if (!id) return null;
+                return (savingsGoals || []).find(g => g.id === id) || null;
+            }
+
+            function openEditSavingsDepositModal(goalId, depositIndex) {
+                const goal = getSavingsGoalById(goalId);
+                if (!goal) return showMessage('Goal not found.', 'error');
+
+                // If the manage modal is open, close it before opening the edit form (prevents nested modal stacking issues).
+                const manageModal = document.getElementById('manage-savings-goal-modal');
+                if (manageModal && !manageModal.classList.contains('hidden')) {
+                    closeManageSavingsGoalModal();
+                    savingsReturnToManageGoalId = goal.id;
+                } else {
+                    savingsReturnToManageGoalId = null;
+                }
+
+                const normalizedDeposits = normalizeSavingsDeposits(goal.deposits);
+                const index = Number(depositIndex);
+                if (!Number.isFinite(index) || index < 0 || index >= normalizedDeposits.length) {
+                    return showMessage('Deposit not found.', 'error');
+                }
+                const dep = normalizedDeposits[index];
+
+                const modal = document.getElementById('add-savings-deposit-modal');
+                const form = document.getElementById('add-savings-deposit-form');
+                const goalIdInput = document.getElementById('savings-deposit-goal-id');
+                const modeInput = document.getElementById('savings-deposit-mode');
+                const indexInput = document.getElementById('savings-deposit-index');
+                const titleEl = document.getElementById('savings-deposit-modal-title');
+                const submitBtn = document.getElementById('savings-deposit-submit-btn');
+                const goalNameEl = document.getElementById('savings-deposit-goal-name');
+                const amountInput = document.getElementById('savings-deposit-amount');
+                const currencySelect = document.getElementById('savings-deposit-currency');
+                const dateInput = document.getElementById('savings-deposit-date');
+                if (!modal || !form || !goalIdInput) return;
+
+                form.reset();
+                goalIdInput.value = goal.id;
+                if (modeInput) modeInput.value = 'edit';
+                if (indexInput) indexInput.value = String(index);
+                if (goalNameEl) goalNameEl.textContent = goal.name || '-';
+                if (amountInput) amountInput.value = String(dep.amount || dep.amountUsd || 0);
+                if (currencySelect) currencySelect.value = (dep.currency || 'USD');
+                if (dateInput) dateInput.value = dep.date || new Date().toISOString().slice(0, 10);
+                if (titleEl) titleEl.innerHTML = '<i class="fas fa-pen-to-square mr-2 text-amber-500"></i> Edit Deposit';
+                if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Changes';
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                if (amountInput) setTimeout(() => amountInput.focus(), 0);
+            }
+
+            async function deleteSavingsDeposit(goalId, depositIndex) {
+                if (!db || !currentUser) return;
+                const goalRef = db.collection(SAVINGS_GOALS_COLLECTION).doc(String(goalId || '').trim());
+                const index = Number(depositIndex);
+
+                try {
+                    await db.runTransaction(async (tx) => {
+                        const snap = await tx.get(goalRef);
+                        if (!snap.exists) throw new Error('Goal does not exist.');
+                        const data = snap.data() || {};
+                        const targetAmount = Number(data.targetAmountUsd) || 0;
+                        const deposits = normalizeSavingsDeposits(data.deposits);
+                        if (!Number.isFinite(index) || index < 0 || index >= deposits.length) {
+                            throw new Error('Deposit not found.');
+                        }
+                        const removed = deposits[index];
+                        deposits.splice(index, 1);
+                        const nextSaved = sumSavingsDepositsUsd(deposits);
+
+                        if (removed && removed.expenseId) {
+                            tx.delete(db.collection('expenses').doc(String(removed.expenseId)));
+                        }
+                        tx.update(goalRef, {
+                            deposits,
+                            currentSavedUsd: nextSaved,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            achievedAt: (targetAmount > 0 && nextSaved >= targetAmount) ? firebase.firestore.FieldValue.serverTimestamp() : null
+                        });
+                    });
+                    showMessage('Deposit deleted.', 'success');
+                } catch (err) {
+                    console.error('Delete savings deposit failed:', err);
+                    showMessage(err && err.message ? err.message : 'Failed to delete deposit.', 'error');
+                }
+            }
+
+            function openManageSavingsGoalModal(goalId) {
+                const modal = document.getElementById('manage-savings-goal-modal');
+                const goalIdInput = document.getElementById('manage-savings-goal-id');
+                if (!modal || !goalIdInput) return;
+
+                goalIdInput.value = String(goalId || '').trim();
+                renderManageSavingsGoalModal();
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function closeManageSavingsGoalModal() {
+                const modal = document.getElementById('manage-savings-goal-modal');
+                if (!modal) return;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            function refreshManageSavingsGoalModalIfOpen() {
+                const modal = document.getElementById('manage-savings-goal-modal');
+                if (!modal || modal.classList.contains('hidden')) return;
+                renderManageSavingsGoalModal();
+            }
+
+            function renderManageSavingsGoalModal() {
+                const goalId = (document.getElementById('manage-savings-goal-id')?.value || '').trim();
+                const goal = getSavingsGoalById(goalId);
+
+                const nameEl = document.getElementById('manage-savings-goal-name');
+                const savedEl = document.getElementById('manage-savings-goal-saved');
+                const targetEl = document.getElementById('manage-savings-goal-target');
+                const progressEl = document.getElementById('manage-savings-goal-progress');
+                const countEl = document.getElementById('manage-savings-goal-deposit-count');
+                const bodyEl = document.getElementById('manage-savings-goal-deposits-body');
+
+                if (!nameEl || !savedEl || !targetEl || !progressEl || !countEl || !bodyEl) return;
+
+                if (!goal) {
+                    nameEl.textContent = '-';
+                    savedEl.textContent = '$0.00';
+                    targetEl.textContent = '$0.00';
+                    progressEl.textContent = '0%';
+                    countEl.textContent = '0';
+                    bodyEl.innerHTML = '<tr><td colspan="4" class="px-3 py-6 text-center text-gray-500">Goal not found</td></tr>';
+                    return;
+                }
+
+                nameEl.textContent = goal.name || '-';
+
+                const deposits = normalizeSavingsDeposits(goal.deposits);
+                const saved = sumSavingsDepositsUsd(deposits);
+                const goalCurrency = (String(goal.targetCurrency || 'USD').toUpperCase() === 'KHR') ? 'KHR' : 'USD';
+                const targetUsd = Number(goal.targetAmountUsd) || 0;
+                const targetOriginal = goalCurrency === 'KHR'
+                    ? (Number(goal.targetOriginalAmount) || Math.round(convertFromUSD(targetUsd, 'KHR')))
+                    : targetUsd;
+                const savedOriginal = goalCurrency === 'KHR' ? Math.round(convertFromUSD(saved, 'KHR')) : saved;
+                const pct = targetUsd > 0 ? Math.min(100, Math.max(0, (saved / targetUsd) * 100)) : 0;
+
+                savedEl.textContent = goalCurrency === 'KHR' ? formatCurrency(savedOriginal, 'KHR') : formatUSD(saved);
+                targetEl.textContent = goalCurrency === 'KHR' ? formatCurrency(targetOriginal, 'KHR') : formatUSD(targetUsd);
+                progressEl.textContent = `${pct.toFixed(0)}%`;
+                countEl.textContent = String(deposits.length);
+
+                if (deposits.length === 0) {
+                    bodyEl.innerHTML = '<tr><td colspan="4" class="px-3 py-6 text-center text-gray-500">No deposits yet</td></tr>';
+                    return;
+                }
+
+                const indexed = deposits.map((d, idx) => ({ d, idx }));
+                indexed.sort((a, b) => {
+                    const ad = a.d.date || '';
+                    const bd = b.d.date || '';
+                    if (ad !== bd) return bd.localeCompare(ad);
+                    return (b.d.amountUsd || 0) - (a.d.amountUsd || 0);
+                });
+
+                bodyEl.innerHTML = indexed.map(item => {
+                    const dep = item.d;
+                    const kind = dep.kind === 'initial' ? 'Initial' : 'Deposit';
+                    const depCurrency = (String(dep.currency || 'USD').toUpperCase() === 'KHR') ? 'KHR' : 'USD';
+                    const amountCell = depCurrency === 'KHR'
+                        ? `${formatCurrency(dep.amount || 0, 'KHR')}<span class="hidden sm:inline text-xs text-gray-400 ml-1">(${formatUSD(dep.amountUsd)})</span>`
+                        : `${formatUSD(dep.amountUsd)}`;
+                    return `
+                        <tr class="savings-deposit-row">
+                            <td class="px-3 py-3 whitespace-nowrap">${dep.date}</td>
+                            <td class="px-3 py-3 font-semibold text-gray-800 whitespace-nowrap">${amountCell}</td>
+                            <td class="px-3 py-3 text-gray-600 whitespace-nowrap savings-col-type">${kind}</td>
+                            <td class="px-3 py-3 text-right whitespace-nowrap">
+                                <button type="button" class="btn-pro btn-outline savings-action-icon-btn" title="Edit" aria-label="Edit" onclick="openEditSavingsDepositModal('${goal.id}', ${item.idx})">
+                                    <i class="fas fa-pen-to-square"></i><span class="hidden md:inline ml-2">Edit</span>
+                                </button>
+                                <button type="button" class="btn-pro btn-outline savings-action-icon-btn ml-2" title="Delete" aria-label="Delete" onclick="confirmDeleteSavingsDeposit('${goal.id}', ${item.idx})">
+                                    <i class="fas fa-trash"></i><span class="hidden md:inline ml-2">Delete</span>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            function openAddSavingsDepositModalFromManage() {
+                const goalId = (document.getElementById('manage-savings-goal-id')?.value || '').trim();
+                if (!goalId) return;
+                closeManageSavingsGoalModal();
+                openAddSavingsDepositModal(goalId, { returnToManageGoalId: goalId });
+            }
+
+            function confirmDeleteSavingsDeposit(goalId, depositIndex) {
+                openConfirmSavingsModal({
+                    title: 'Delete deposit?',
+                    message: 'This will remove the selected deposit and update the goal balance and progress. This action cannot be undone.',
+                    confirmText: 'Delete',
+                    confirmClass: 'bg-red-600 hover:bg-red-700',
+                    onConfirm: async () => {
+                        closeConfirmSavingsModal();
+                        await deleteSavingsDeposit(goalId, depositIndex);
+                        openManageSavingsGoalModal(goalId);
+                    }
+                });
+            }
+
+            async function deleteSavingsGoal(goalId) {
+                if (!db || !currentUser) return;
+                try {
+                    const id = String(goalId || '').trim();
+                    const goal = getSavingsGoalById(id);
+                    const deposits = goal ? normalizeSavingsDeposits(goal.deposits) : [];
+                    // Best-effort cleanup of linked expenses (client-side).
+                    await Promise.allSettled(deposits.map(d => d && d.expenseId ? db.collection('expenses').doc(String(d.expenseId)).delete() : Promise.resolve()));
+                    await db.collection(SAVINGS_GOALS_COLLECTION).doc(id).delete();
+                    showMessage('Goal deleted.', 'success');
+                } catch (err) {
+                    console.error('Delete savings goal failed:', err);
+                    showMessage(err && err.message ? err.message : 'Failed to delete goal.', 'error');
+                }
+            }
+
+            function confirmDeleteSavingsGoalFromManage() {
+                const goalId = (document.getElementById('manage-savings-goal-id')?.value || '').trim();
+                const goal = getSavingsGoalById(goalId);
+                if (!goalId) return;
+
+                openConfirmSavingsModal({
+                    title: 'Delete this goal?',
+                    message: `Delete goal "${goal ? (goal.name || '') : ''}" and all its deposits? This action cannot be undone.`,
+                    confirmText: 'Delete Goal',
+                    confirmClass: 'bg-red-600 hover:bg-red-700',
+                    onConfirm: async () => {
+                        closeConfirmSavingsModal();
+                        closeManageSavingsGoalModal();
+                        await deleteSavingsGoal(goalId);
+                    }
+                });
+            }
+
+            function buildSavingsGoalPdfSummary(goal) {
+                const deposits = normalizeSavingsDeposits(goal && goal.deposits);
+                const saved = sumSavingsDepositsUsd(deposits);
+                const target = Number(goal && goal.targetAmountUsd) || 0;
+                const pct = target > 0 ? Math.min(100, Math.max(0, (saved / target) * 100)) : 0;
+                const remaining = Math.max(0, target - saved);
+                const deadline = normalizeIsoDate(goal && goal.deadline);
+                const calc = calculateDailySavingNeeded(target, saved, deadline);
+                const displayCurrency = (String(goal && goal.targetCurrency || 'USD').toUpperCase() === 'KHR') ? 'KHR' : 'USD';
+
+                return {
+                    deposits,
+                    saved,
+                    target,
+                    displayCurrency,
+                    pct,
+                    remaining,
+                    deadline,
+                    dailyNeeded: calc.dailyNeeded,
+                    daysRemaining: calc.daysRemaining
+                };
+            }
+
+            function drawSavingsGoalSummaryBox(doc, baseFont, startY, goal, summary) {
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const boxX = 32;
+                const boxW = pageWidth - boxX * 2;
+                const boxH = 118;
+
+                doc.setFillColor(246, 248, 255);
+                doc.roundedRect(boxX, startY, boxW, boxH, 6, 6, 'F');
+                doc.setDrawColor(99, 102, 241);
+                doc.roundedRect(boxX, startY, boxW, boxH, 6, 6, 'S');
+
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(45, 55, 72);
+                doc.setFontSize(12);
+                doc.text('Goal Summary', boxX + 12, startY + 18);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setFontSize(9);
+                doc.setTextColor(75, 85, 99);
+                doc.text(`Goal: ${normalizePdfText(goal.name || '-')}`, boxX + 12, startY + 36);
+                doc.text(`Deadline: ${summary.deadline || '-'}`, boxX + 12, startY + 50);
+
+                doc.setTextColor(45, 55, 72);
+                doc.text('Target:', boxX + boxW / 2 + 10, startY + 36);
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(99, 102, 241);
+                const targetLabel = summary.displayCurrency === 'KHR'
+                    ? formatCurrency(Math.round(convertFromUSD(summary.target, 'KHR')), 'KHR')
+                    : formatUSD(summary.target);
+                doc.text(`${targetLabel}`, boxX + boxW / 2 + 70, startY + 36);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setTextColor(45, 55, 72);
+                doc.text('Saved:', boxX + boxW / 2 + 10, startY + 50);
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(22, 163, 74);
+                const savedLabel = summary.displayCurrency === 'KHR'
+                    ? formatCurrency(Math.round(convertFromUSD(summary.saved, 'KHR')), 'KHR')
+                    : formatUSD(summary.saved);
+                doc.text(`${savedLabel}`, boxX + boxW / 2 + 70, startY + 50);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setTextColor(45, 55, 72);
+                doc.text('Progress:', boxX + 12, startY + 72);
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(45, 55, 72);
+                doc.text(`${summary.pct.toFixed(0)}%`, boxX + 70, startY + 72);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setTextColor(45, 55, 72);
+                doc.text('Remaining:', boxX + 12, startY + 88);
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(220, 38, 38);
+                const remainingLabel = summary.displayCurrency === 'KHR'
+                    ? formatCurrency(Math.round(convertFromUSD(summary.remaining, 'KHR')), 'KHR')
+                    : formatUSD(summary.remaining);
+                doc.text(`${remainingLabel}`, boxX + 70, startY + 88);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setTextColor(45, 55, 72);
+                doc.text('Daily Needed:', boxX + boxW / 2 + 10, startY + 72);
+                doc.setFont(baseFont, 'bold');
+                doc.setTextColor(45, 55, 72);
+                const daily = summary.daysRemaining > 0 ? summary.dailyNeeded : summary.remaining;
+                const dailyLabel = summary.displayCurrency === 'KHR'
+                    ? `${formatCurrency(Math.max(0, Math.round(convertFromUSD(daily, 'KHR'))), 'KHR')} / day`
+                    : `${formatUSD(daily)} / day`;
+                doc.text(dailyLabel, boxX + boxW / 2 + 90, startY + 72);
+
+                doc.setFont(baseFont, 'normal');
+                doc.setTextColor(75, 85, 99);
+                doc.text(`Days remaining: ${summary.daysRemaining}`, boxX + boxW / 2 + 10, startY + 88);
+
+                return startY + boxH + 16;
+            }
+
+            async function downloadSavingsGoalPdf(goalId) {
+                const goal = getSavingsGoalById(goalId);
+                if (!goal) return showMessage('Goal not found.', 'error');
+
+                const summary = buildSavingsGoalPdfSummary(goal);
+                const dateRangeText = `Goal deadline: ${summary.deadline || '-'}`;
+                const styled = await createStyledPdf(goal.name || 'Savings Goal', dateRangeText, 'SAVINGS GOAL REPORT');
+                if (!styled) return;
+
+                const { doc, baseFont, cursorY } = styled;
+                let y = cursorY;
+
+                y = drawSavingsGoalSummaryBox(doc, baseFont, y, goal, summary);
+
+                // Deposit history table
+                const deposits = [...summary.deposits].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+                const rows = deposits.map(d => [
+                    d.date || '-',
+                    formatCurrency(Number(d.amount) || 0, d.currency || 'USD'),
+                    (String(d.currency || 'USD').toUpperCase() === 'KHR') ? 'KHR' : 'USD',
+                    d.kind === 'initial' ? 'Initial' : 'Deposit'
+                ]);
+
+                doc.setFont(baseFont, 'bold');
+                doc.setFontSize(12);
+                doc.setTextColor(45, 55, 72);
+                doc.text('Deposit History', 32, y);
+
+                doc.autoTable({
+                    startY: y + 10,
+                    head: [['Date', 'Amount', 'Currency', 'Type']],
+                    body: rows.length > 0 ? rows : [['-', '-', '-', '-']],
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [99, 102, 241],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    styles: {
+                        font: baseFont,
+                        fontSize: 9,
+                        textColor: [45, 55, 72],
+                        cellPadding: 6
+                    },
+                    alternateRowStyles: {
+                        fillColor: [246, 248, 255]
+                    },
+                    margin: { left: 32, right: 32 }
+                });
+
+                doc.save(buildPdfFilename(`savings-goal-${goalId}`));
+            }
+
+            function downloadSavingsGoalPdfFromManage() {
+                const goalId = (document.getElementById('manage-savings-goal-id')?.value || '').trim();
+                if (!goalId) return;
+                downloadSavingsGoalPdf(goalId);
+            }
+
+            function initSavingsGoalsUI() {
+                const addGoalForm = document.getElementById('add-savings-goal-form');
+                const depositForm = document.getElementById('add-savings-deposit-form');
+                if (addGoalForm) addGoalForm.addEventListener('submit', handleAddSavingsGoalSubmit);
+                if (depositForm) depositForm.addEventListener('submit', handleAddSavingsDepositSubmit);
+
+                // Close on backdrop click
+                const goalModal = document.getElementById('add-savings-goal-modal');
+                if (goalModal) {
+                    goalModal.addEventListener('click', (e) => {
+                        if (e.target === goalModal) closeAddSavingsGoalModal();
+                    });
+                }
+                const depositModal = document.getElementById('add-savings-deposit-modal');
+                if (depositModal) {
+                    depositModal.addEventListener('click', (e) => {
+                        if (e.target === depositModal) closeAddSavingsDepositModal();
+                    });
+                }
+                const manageModal = document.getElementById('manage-savings-goal-modal');
+                if (manageModal) {
+                    manageModal.addEventListener('click', (e) => {
+                        if (e.target === manageModal) closeManageSavingsGoalModal();
+                    });
+                }
+                const confirmModal = document.getElementById('confirm-savings-modal');
+                if (confirmModal) {
+                    confirmModal.addEventListener('click', (e) => {
+                        if (e.target === confirmModal) closeConfirmSavingsModal();
+                    });
+                }
+                const confirmBtn = document.getElementById('confirm-savings-confirm-btn');
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', async () => {
+                        const action = pendingSavingsConfirmAction;
+                        if (typeof action === 'function') {
+                            await action();
+                        } else {
+                            closeConfirmSavingsModal();
+                        }
+                    });
+                }
+
+                // Initial paint (in case snapshot already populated)
+                renderSavingsGoals();
+            }
+
+            // Make modals callable from inline HTML
+            window.openAddSavingsGoalModal = openAddSavingsGoalModal;
+            window.closeAddSavingsGoalModal = closeAddSavingsGoalModal;
+            window.openAddSavingsDepositModal = openAddSavingsDepositModal;
+            window.closeAddSavingsDepositModal = closeAddSavingsDepositModal;
+            window.openManageSavingsGoalModal = openManageSavingsGoalModal;
+            window.closeManageSavingsGoalModal = closeManageSavingsGoalModal;
+            window.refreshManageSavingsGoalModalIfOpen = refreshManageSavingsGoalModalIfOpen;
+            window.openAddSavingsDepositModalFromManage = openAddSavingsDepositModalFromManage;
+            window.confirmDeleteSavingsGoalFromManage = confirmDeleteSavingsGoalFromManage;
+            window.openEditSavingsDepositModal = openEditSavingsDepositModal;
+            window.confirmDeleteSavingsDeposit = confirmDeleteSavingsDeposit;
+            window.closeConfirmSavingsModal = closeConfirmSavingsModal;
+            window.downloadSavingsGoalPdfFromManage = downloadSavingsGoalPdfFromManage;
+            window.renderSavingsGoals = renderSavingsGoals;
+            window.calculateDailySavingNeeded = calculateDailySavingNeeded;
+
+            document.addEventListener('DOMContentLoaded', initSavingsGoalsUI);
+
+            // ============================================
             // GLOBAL SEARCH FUNCTIONALITY
             // ============================================
 
@@ -11187,6 +12596,7 @@
                 const monthNet = calculateNetBalanceWithLedger({
                     monthKey: currentMonthKey
                 }).netBalance;
+                const monthSavingsAllocated = getSavingsAllocatedForMonth(currentMonthKey);
 
                 // Update dashboard stats
                 updateElementSafe('dashboard-balance', formatCurrency(balance, 'USD'), balance >= 0 ? 'text-green-500' : 'text-red-500');
@@ -11196,6 +12606,8 @@
                 updateElementSafe('dash-month-expense', formatCurrency(monthExpense, 'USD'));
                 updateElementSafe('dash-month-income', formatCurrency(monthIncome, 'USD'));
                 updateElementSafe('dash-net-balance', formatCurrency(monthNet, 'USD'), monthNet >= 0 ? 'text-green-500' : 'text-red-500');
+                const savingsAllocatedEl = document.getElementById('dash-savings-allocated');
+                if (savingsAllocatedEl) savingsAllocatedEl.textContent = formatCurrency(monthSavingsAllocated, 'USD');
 
                 // Update summary text
                 const summaryEl = document.getElementById('dashboard-summary');

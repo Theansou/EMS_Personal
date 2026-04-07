@@ -228,6 +228,22 @@ service cloud.firestore {
       allow delete: if isAllowedSharedEmail()
         && ((resource.data.userId == request.auth.uid) || isEmailOwner() || isSharedGroupDoc() || isTwoEmailLegacyDoc() || isAdmin());
     }
+
+    // ============================================
+    // SAVINGS GOALS COLLECTION
+    // ============================================
+    match /savings_goals/{goalId} {
+      allow read: if isAllowedSharedEmail()
+        && ((resource.data.userId == request.auth.uid) || isEmailOwner() || isSharedGroupDoc() || isTwoEmailLegacyDoc() || isAdmin());
+
+      allow create: if isAllowedSharedEmail()
+        && request.resource.data.userId == request.auth.uid
+        && isCreateEmailOwner()
+        && (isSharedGroupCreateDoc() || isTwoEmailLegacyCreateDoc());
+
+      allow update, delete: if isAllowedSharedEmail()
+        && ((resource.data.userId == request.auth.uid) || isEmailOwner() || isSharedGroupDoc() || isTwoEmailLegacyDoc() || isAdmin());
+    }
     
     // ============================================
     // SESSION INVALIDATIONS (Force Logout)

@@ -1750,6 +1750,205 @@ input[type="month"].glass-input::-webkit-calendar-picker-indicator {
 }
 
 
+/* ===== Savings Goals (Report Tab) ===== */
+
+.savings-goal-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.savings-goal-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(800px circle at 10% 10%, rgba(16, 185, 129, 0.12), transparent 40%),
+        radial-gradient(700px circle at 90% 10%, rgba(245, 158, 11, 0.10), transparent 45%);
+    pointer-events: none;
+}
+
+.savings-goal-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.20);
+    flex: 0 0 auto;
+}
+
+.savings-progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(226, 232, 240, 0.9);
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.savings-progress-bar {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+    box-shadow: 0 6px 14px rgba(16, 185, 129, 0.20);
+}
+
+body.dark-mode .savings-goal-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border-color: rgba(52, 211, 153, 0.25);
+}
+
+body.dark-mode .savings-progress-track {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(148, 163, 184, 0.25);
+}
+
+body.dark-mode .savings-progress-bar {
+    background: linear-gradient(90deg, #34d399, #60a5fa);
+}
+
+body.dark-mode .savings-goal-insight {
+    color: var(--dark-text-secondary) !important;
+}
+
+body.dark-mode #report-tab #savings-goals-empty {
+    color: var(--dark-text-secondary) !important;
+}
+
+.savings-deposits-table-wrap {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 16px;
+    overflow-x: auto;
+}
+
+.savings-deposits-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.savings-deposits-table th {
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(248, 250, 252, 0.9);
+}
+
+.savings-deposits-table td {
+    font-size: 13px;
+}
+
+.savings-action-icon-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    line-height: 1;
+}
+
+.savings-action-icon-btn i {
+    font-size: 13px;
+}
+
+.savings-col-type {
+    /* marker for responsive hiding */
+}
+
+@media (max-width: 640px) {
+    .savings-deposits-table th,
+    .savings-deposits-table td {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    .savings-deposits-table td {
+        font-size: 12px;
+    }
+
+    .savings-col-type {
+        display: none;
+    }
+
+    .savings-action-icon-btn {
+        padding: 6px 8px;
+        min-width: 34px;
+        justify-content: center;
+    }
+
+    .savings-action-icon-btn span {
+        display: none !important;
+    }
+}
+
+.savings-deposit-row:hover td {
+    background: rgba(99, 102, 241, 0.06);
+}
+
+/* Manage Goal actions (mobile) */
+@media (max-width: 640px) {
+    .manage-savings-actions {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px !important;
+        width: 100%;
+    }
+
+    .manage-savings-actions .btn-pro {
+        padding: 10px 8px !important;
+        font-size: 12px !important;
+        min-width: 0 !important;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .manage-savings-actions .btn-pro i {
+        margin-right: 0 !important;
+        font-size: 14px;
+    }
+
+    .manage-savings-action-text {
+        display: none !important;
+    }
+}
+
+body.dark-mode .savings-deposits-table-wrap {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(51, 65, 85, 0.9);
+}
+
+body.dark-mode .savings-deposits-table th {
+    background: rgba(15, 23, 42, 0.55);
+    color: var(--dark-text-secondary) !important;
+    border-color: rgba(51, 65, 85, 0.9) !important;
+}
+
+body.dark-mode .savings-deposits-table td {
+    color: var(--dark-text) !important;
+    border-color: rgba(51, 65, 85, 0.9) !important;
+}
+
+body.dark-mode .savings-deposit-row:hover td {
+    background: rgba(99, 102, 241, 0.10) !important;
+}
+
+/* Savings Goals modal stacking (avoid hidden forms behind manage modal) */
+#manage-savings-goal-modal {
+    z-index: 1050;
+}
+
+#add-savings-deposit-modal,
+#add-savings-goal-modal {
+    z-index: 1060;
+}
+
+#confirm-savings-modal {
+    z-index: 1070;
+}
+
+
 /* ===== Dashboard Overview Section ===== */
 
 .dashboard-overview {
