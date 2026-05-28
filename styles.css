@@ -1761,8 +1761,7 @@ input[type="month"].glass-input::-webkit-calendar-picker-indicator {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(800px circle at 10% 10%, rgba(16, 185, 129, 0.12), transparent 40%),
-        radial-gradient(700px circle at 90% 10%, rgba(245, 158, 11, 0.10), transparent 45%);
+    background: radial-gradient(800px circle at 10% 10%, rgba(16, 185, 129, 0.12), transparent 40%), radial-gradient(700px circle at 90% 10%, rgba(245, 158, 11, 0.10), transparent 45%);
     pointer-events: none;
 }
 
@@ -1862,21 +1861,17 @@ body.dark-mode #report-tab #savings-goals-empty {
         padding-left: 10px !important;
         padding-right: 10px !important;
     }
-
     .savings-deposits-table td {
         font-size: 12px;
     }
-
     .savings-col-type {
         display: none;
     }
-
     .savings-action-icon-btn {
         padding: 6px 8px;
         min-width: 34px;
         justify-content: center;
     }
-
     .savings-action-icon-btn span {
         display: none !important;
     }
@@ -1886,7 +1881,9 @@ body.dark-mode #report-tab #savings-goals-empty {
     background: rgba(99, 102, 241, 0.06);
 }
 
+
 /* Manage Goal actions (mobile) */
+
 @media (max-width: 640px) {
     .manage-savings-actions {
         display: grid !important;
@@ -1894,7 +1891,6 @@ body.dark-mode #report-tab #savings-goals-empty {
         gap: 8px !important;
         width: 100%;
     }
-
     .manage-savings-actions .btn-pro {
         padding: 10px 8px !important;
         font-size: 12px !important;
@@ -1903,12 +1899,10 @@ body.dark-mode #report-tab #savings-goals-empty {
         text-align: center;
         white-space: nowrap;
     }
-
     .manage-savings-actions .btn-pro i {
         margin-right: 0 !important;
         font-size: 14px;
     }
-
     .manage-savings-action-text {
         display: none !important;
     }
@@ -1934,7 +1928,9 @@ body.dark-mode .savings-deposit-row:hover td {
     background: rgba(99, 102, 241, 0.10) !important;
 }
 
+
 /* Savings Goals modal stacking (avoid hidden forms behind manage modal) */
+
 #manage-savings-goal-modal {
     z-index: 1050;
 }
@@ -3913,6 +3909,80 @@ body:not(.dark-mode) #ledger-tab .glass-panel {
     background: #ffffff;
     border-color: #e5e7eb;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-filter-group label {
+    color: #334155;
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-filter-group select,
+body:not(.dark-mode) #ledger-tab .ledger-filter-group input {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96)) !important;
+    border: 1px solid rgba(148, 163, 184, 0.55) !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-filter-group select:hover,
+body:not(.dark-mode) #ledger-tab .ledger-filter-group input:hover {
+    border-color: rgba(99, 102, 241, 0.55) !important;
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-filter-group select:focus,
+body:not(.dark-mode) #ledger-tab .ledger-filter-group input:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14) !important;
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-mini-tab-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.42);
+    color: #334155;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-mini-tab-btn:hover {
+    background: rgba(241, 245, 249, 0.96);
+    border-color: rgba(99, 102, 241, 0.45);
+    color: #1e293b;
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-mini-tab-btn.active,
+body:not(.dark-mode) #ledger-tab .ledger-mini-tab-btn[aria-pressed="true"] {
+    background: linear-gradient(135deg, rgba(238, 242, 255, 0.98), rgba(219, 234, 254, 0.98));
+    border-color: rgba(99, 102, 241, 0.55);
+    color: #3730a3;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-filter-clear-btn {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+    border-color: rgba(148, 163, 184, 0.5);
+    color: #334155;
+}
+
+body:not(.dark-mode) #ledger-tab .ledger-filter-all-btn {
+    background: linear-gradient(180deg, rgba(236, 253, 245, 0.98), rgba(220, 252, 231, 0.96));
+    border-color: rgba(16, 185, 129, 0.45);
+    color: #065f46;
+}
+
+body:not(.dark-mode) #ledger-tab .monthly-summary-box {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(238, 242, 255, 0.94)) !important;
+    border-color: rgba(199, 210, 254, 0.82) !important;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06) !important;
+}
+
+body:not(.dark-mode) #ledger-tab .month-chart-card,
+body:not(.dark-mode) #ledger-tab .week-card {
+    background: #ffffff !important;
+    border-color: rgba(226, 232, 240, 0.95) !important;
+}
+
+body:not(.dark-mode) #ledger-tab .week-title,
+body:not(.dark-mode) #ledger-tab .chart-title,
+body:not(.dark-mode) #ledger-tab .weekly-breakdown-title {
+    color: #1e293b !important;
 }
 
 body:not(.dark-mode) .text-gray-800,
@@ -5905,6 +5975,30 @@ body.dark-mode #history-tab .divide-y>* {
     border-spacing: 0 10px;
 }
 
+#ledger-tab .ledger-table-container {
+    position: relative;
+    overflow-x: auto;
+    overflow-y: visible;
+    max-height: none;
+    border-radius: 14px;
+}
+
+#ledger-tab .ledger-table thead th {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    font-size: 0.73rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    line-height: 1.05;
+    color: #475569;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: rgba(241, 245, 249, 0.96);
+    backdrop-filter: blur(4px);
+    border-bottom: 1px solid rgba(203, 213, 225, 0.92);
+}
+
 #ledger-tab #ledger-table-body tr {
     animation: ledgerRowEnter 260ms ease-out both;
     transition: transform 0.2s ease, filter 0.2s ease;
@@ -5915,6 +6009,8 @@ body.dark-mode #history-tab .divide-y>* {
     border-top: 1px solid rgba(226, 232, 240, 0.95);
     border-bottom: 1px solid rgba(226, 232, 240, 0.95);
     vertical-align: middle;
+    padding-top: 12px;
+    padding-bottom: 12px;
 }
 
 #ledger-tab #ledger-table-body td:first-child {
@@ -6093,9 +6189,57 @@ body.dark-mode #ledger-tab .ledger-table-container {
     border-radius: 14px;
 }
 
+body.dark-mode #ledger-tab #ledger-person-summary {
+    background: rgba(15, 23, 42, 0.88) !important;
+    border-color: rgba(71, 85, 105, 0.85) !important;
+    box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.08), 0 10px 24px rgba(2, 6, 23, 0.35) !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary h4,
+body.dark-mode #ledger-tab #ledger-person-summary .text-emerald-800 {
+    color: #d1fae5 !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary .text-emerald-700,
+body.dark-mode #ledger-tab #ledger-person-summary .text-xs {
+    color: #86efac !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary table {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary thead tr {
+    border-bottom-color: rgba(71, 85, 105, 0.85) !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary th {
+    color: #a7f3d0 !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary td {
+    color: #e2e8f0 !important;
+    border-color: rgba(71, 85, 105, 0.8) !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary tbody tr:hover {
+    background: rgba(30, 41, 59, 0.7) !important;
+}
+
+body.dark-mode #ledger-tab #ledger-person-summary .text-emerald-800,
+body.dark-mode #ledger-tab #ledger-person-summary .text-emerald-700 {
+    color: #bbf7d0 !important;
+}
+
 body.dark-mode #ledger-tab .ledger-table th {
     color: var(--dark-text-secondary) !important;
     border-color: var(--dark-border) !important;
+}
+
+body.dark-mode #ledger-tab .ledger-table thead th {
+    background: rgba(15, 23, 42, 0.94) !important;
+    color: #cbd5e1 !important;
+    border-bottom: 1px solid rgba(71, 85, 105, 0.9) !important;
 }
 
 body.dark-mode #ledger-tab #ledger-table-body tr {
@@ -6329,15 +6473,42 @@ body.dark-mode #ledger-tab .ledger-action-btn-delete:hover {
 }
 
 #ledger-tab .ledger-filter-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: minmax(150px, 1.05fr) minmax(84px, 0.56fr) minmax(136px, 0.92fr) minmax(136px, 0.92fr) auto auto;
+    grid-template-areas: "month year start end all clear";
+    align-items: end;
+    gap: 8px;
+    width: 100%;
+}
+
+#ledger-tab .ledger-filter-month-group {
+    grid-area: month;
+}
+
+#ledger-tab .ledger-filter-year-group {
+    grid-area: year;
+}
+
+#ledger-tab .ledger-filter-start-group {
+    grid-area: start;
+}
+
+#ledger-tab .ledger-filter-end-group {
+    grid-area: end;
+}
+
+#ledger-tab .ledger-filter-clear-control {
+    grid-area: clear;
+}
+
+#ledger-tab .ledger-filter-all-control {
+    grid-area: all;
 }
 
 #ledger-tab .ledger-filter-group {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 6px;
     min-width: 0;
 }
@@ -6345,11 +6516,52 @@ body.dark-mode #ledger-tab .ledger-action-btn-delete:hover {
 #ledger-tab .ledger-filter-group label {
     margin-bottom: 0;
     white-space: nowrap;
+    font-size: 0.72rem;
+    line-height: 1;
 }
 
-#ledger-tab .ledger-filter-group select {
-    width: 170px;
+#ledger-tab .ledger-filter-group select,
+#ledger-tab .ledger-filter-group input {
+    width: 100%;
     min-width: 0;
+    min-height: 36px;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+    font-size: 0.92rem;
+}
+
+#ledger-tab #ledger-range-year {
+    max-width: 100px;
+}
+
+#ledger-tab #ledger-range-start,
+#ledger-tab #ledger-range-end {
+    min-width: 136px;
+}
+
+#ledger-tab #ledger-range-month,
+#ledger-tab #ledger-range-start,
+#ledger-tab #ledger-range-end {
+    font-weight: 600;
+}
+
+#ledger-tab #ledger-range-month::-webkit-calendar-picker-indicator,
+#ledger-tab #ledger-range-start::-webkit-calendar-picker-indicator,
+#ledger-tab #ledger-range-end::-webkit-calendar-picker-indicator {
+    opacity: 0.75;
+    cursor: pointer;
+}
+
+#ledger-tab #ledger-mini-tabs {
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+#ledger-tab #ledger-mini-tabs .ledger-mini-tab-btn {
+    min-height: 34px;
+    padding: 0.45rem 0.8rem;
+    border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
 #ledger-tab .ledger-filter-clear-btn {
@@ -6359,7 +6571,7 @@ body.dark-mode #ledger-tab .ledger-action-btn-delete:hover {
     border: 1px solid rgba(148, 163, 184, 0.4);
     background: rgba(255, 255, 255, 0.82);
     color: #475569;
-    font-size: 0.74rem;
+    font-size: 0.7rem;
     font-weight: 700;
     line-height: 1;
     white-space: nowrap;
@@ -6375,6 +6587,32 @@ body.dark-mode #ledger-tab .ledger-action-btn-delete:hover {
 }
 
 #ledger-tab .ledger-filter-clear-btn:active {
+    transform: scale(0.98);
+}
+
+#ledger-tab .ledger-filter-all-btn {
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 9px;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    background: rgba(236, 253, 245, 0.9);
+    color: #047857;
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+#ledger-tab .ledger-filter-all-btn:hover {
+    background: rgba(209, 250, 229, 0.96);
+    border-color: rgba(5, 150, 105, 0.55);
+    color: #065f46;
+}
+
+#ledger-tab .ledger-filter-all-btn:active {
     transform: scale(0.98);
 }
 
@@ -6396,25 +6634,33 @@ body.dark-mode #ledger-tab .ledger-action-btn-delete:hover {
 }
 
 #ledger-tab .ledger-export-group button {
-    padding: 0.45rem 0.8rem;
+    min-height: 36px;
+    padding: 0.45rem 0.85rem;
     font-size: 0.72rem;
     white-space: nowrap;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1360px) {
     #ledger-tab .ledger-filter-row {
-        flex-wrap: wrap;
-        row-gap: 8px;
+        grid-template-columns: repeat(2, minmax(170px, 1fr));
+        grid-template-areas: "month year" "start end" "all clear";
+        align-items: stretch;
     }
-    #ledger-tab .ledger-filter-group select {
-        width: 155px;
+    #ledger-tab .ledger-filter-clear-control,
+    #ledger-tab .ledger-filter-all-control {
+        justify-self: start;
     }
     #ledger-tab .ledger-export-group {
         margin-left: 0;
     }
 }
 
-@media (max-width: 1120px) {
+@media (max-width: 1200px) {
     #ledger-tab .ledger-transactions-header {
         flex-wrap: wrap;
     }
@@ -6480,21 +6726,38 @@ body.dark-mode #ledger-tab .ledger-action-btn-delete:hover {
         gap: 8px;
     }
     #ledger-tab .ledger-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-areas: "month year" "start end" "all clear";
         gap: 8px;
     }
     #ledger-tab .ledger-filter-group {
-        flex: 1 1 0;
-    }
-    #ledger-tab .ledger-filter-group select {
         width: 100%;
+    }
+    #ledger-tab .ledger-filter-group select,
+    #ledger-tab .ledger-filter-group input,
+    #ledger-tab #ledger-range-year,
+    #ledger-tab #ledger-range-start,
+    #ledger-tab #ledger-range-end {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
     }
     #ledger-tab .ledger-export-group {
         width: 100%;
         justify-content: flex-start;
+        gap: 8px;
     }
-    #ledger-tab .ledger-filter-clear-btn {
-        height: 38px;
+    #ledger-tab .ledger-export-group button {
+        min-height: 38px;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.76rem;
+    }
+    #ledger-tab .ledger-filter-clear-btn,
+    #ledger-tab .ledger-filter-all-btn {
+        width: 100%;
+        height: 44px;
         padding: 0 12px;
+        justify-self: stretch;
     }
     #ledger-tab #ledger-month-focus {
         max-width: 100%;
@@ -6521,6 +6784,13 @@ body.dark-mode #ledger-tab .ledger-action-btn-delete:hover {
         padding-top: 10px;
         padding-bottom: 10px;
         white-space: nowrap;
+    }
+}
+
+@media (max-width: 420px) {
+    #ledger-tab .ledger-filter-row {
+        grid-template-columns: 1fr;
+        grid-template-areas: "month" "year" "start" "end" "all" "clear";
     }
 }
 
@@ -8247,6 +8517,21 @@ body:not(.dark-mode) .glass-input:focus {
     body:not(.dark-mode) #ledger-tab #ledger-salary-target-currency:focus {
         background: linear-gradient(135deg, #93c5fd 0%, #60a5fa 100%) !important;
         box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+    }
+    body:not(.dark-mode) #ledger-tab .ledger-filter-group select,
+    body:not(.dark-mode) #ledger-tab .ledger-filter-group input {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(241, 245, 249, 0.98)) !important;
+        border: 1px solid rgba(100, 116, 139, 0.5) !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+    }
+    body:not(.dark-mode) #ledger-tab .ledger-filter-group label {
+        color: #334155 !important;
+        font-weight: 700;
+    }
+    body:not(.dark-mode) #ledger-tab .ledger-mini-tab-btn,
+    body:not(.dark-mode) #ledger-tab .ledger-filter-clear-btn,
+    body:not(.dark-mode) #ledger-tab .ledger-filter-all-btn {
+        min-height: 44px;
     }
 }
 

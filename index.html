@@ -1119,7 +1119,7 @@
                                     <div id="ledger-total-recovery" class="text-lg font-bold text-green-700">$0.00</div>
                                 </div>
                                 <div id="ledger-card-salary" class="rounded-xl bg-blue-50 border border-blue-100 p-3">
-                                    <div class="text-xs text-blue-600 font-semibold">Salary Partial</div>
+                                    <div class="text-xs text-blue-600 font-semibold">Salary Payment</div>
                                     <div id="ledger-total-salary" class="text-lg font-bold text-blue-700">$0.00</div>
                                 </div>
                                 <div id="ledger-card-net" class="rounded-xl bg-slate-50 border border-slate-100 p-3">
@@ -1133,26 +1133,33 @@
                             <div class="ledger-transactions-header flex flex-col md:flex-row items-start md:items-center justify-between gap-3 mb-4">
                                 <div class="min-w-0">
                                     <h3 class="text-lg font-bold text-gray-800">Ledger Transactions</h3>
+                                    <div id="ledger-mini-tabs" class="mt-3 inline-flex flex-wrap items-center gap-2">
+                                        <button type="button" class="ledger-mini-tab-btn rounded-lg px-3 py-1.5 text-xs font-semibold border border-indigo-200 bg-indigo-50 text-indigo-700" data-ledger-mini-tab="all">All</button>
+                                        <button type="button" class="ledger-mini-tab-btn rounded-lg px-3 py-1.5 text-xs font-semibold border border-gray-200 bg-white text-gray-700" data-ledger-mini-tab="lending">Lending</button>
+                                        <button type="button" class="ledger-mini-tab-btn rounded-lg px-3 py-1.5 text-xs font-semibold border border-gray-200 bg-white text-gray-700" data-ledger-mini-tab="recovery">Recovery</button>
+                                        <button type="button" class="ledger-mini-tab-btn rounded-lg px-3 py-1.5 text-xs font-semibold border border-gray-200 bg-white text-gray-700" data-ledger-mini-tab="salary">Salary Payment</button>
+                                    </div>
                                     <div class="ledger-filter-row mt-2 md:mt-0">
-                                        <div class="ledger-filter-group">
-                                            <label for="ledger-view-filter" class="text-sm font-semibold text-gray-600">View:</label>
-                                            <select id="ledger-view-filter" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
-                                                <option value="selected-month">Selected Month</option>
-                                                <option value="all-months">View All Months</option>
-                                                <option value="all-pending">View All Pending</option>
-                                                <option value="salary-partial-month">Salary Partial (Selected Month)</option>
-                                                <option value="salary-partial-all">Salary Partial (All Months)</option>
-                                            </select>
+                                        <div class="ledger-filter-group ledger-filter-month-group">
+                                            <label for="ledger-range-month" class="text-sm font-semibold text-gray-600">Month:</label>
+                                            <input type="month" id="ledger-range-month" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
                                         </div>
-                                        <div class="ledger-filter-group">
-                                            <label for="ledger-status-filter" class="text-sm font-semibold text-gray-600">Status:</label>
-                                            <select id="ledger-status-filter" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
-                                                <option value="all">All</option>
-                                                <option value="pending">Pending</option>
-                                                <option value="completed">Completed</option>
-                                            </select>
+                                        <div class="ledger-filter-group ledger-filter-year-group">
+                                            <label for="ledger-range-year" class="text-sm font-semibold text-gray-600">Year:</label>
+                                            <input type="number" id="ledger-range-year" min="2000" max="2100" class="glass-input rounded-lg text-sm text-gray-700 bg-white" placeholder="2026">
                                         </div>
-                                        <button type="button" id="ledger-filter-clear-btn" class="ledger-filter-clear-btn" title="Reset filters to default">
+                                        <div class="ledger-filter-group ledger-filter-start-group">
+                                            <label for="ledger-range-start" class="text-sm font-semibold text-gray-600">Start:</label>
+                                            <input type="date" id="ledger-range-start" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
+                                        </div>
+                                        <div class="ledger-filter-group ledger-filter-end-group">
+                                            <label for="ledger-range-end" class="text-sm font-semibold text-gray-600">End:</label>
+                                            <input type="date" id="ledger-range-end" class="glass-input rounded-lg text-sm text-gray-700 bg-white">
+                                        </div>
+                                        <button type="button" id="ledger-filter-all-btn" class="ledger-filter-all-btn ledger-filter-all-control" title="Show all dates">
+                                            All Time
+                                        </button>
+                                        <button type="button" id="ledger-filter-clear-btn" class="ledger-filter-clear-btn ledger-filter-clear-control" title="Reset filters to default">
                                             Clear
                                         </button>
                                     </div>
@@ -1166,12 +1173,33 @@
                                     </button>
                                 </div>
                             </div>
+                            <div id="ledger-person-summary" class="hidden mb-4 rounded-xl border border-emerald-100 bg-emerald-50/70 p-4">
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <h4 id="ledger-person-summary-title" class="text-sm font-bold text-emerald-800">Per-person summary</h4>
+                                    <span class="text-xs text-emerald-700">All-time overview</span>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-xs">
+                                        <thead>
+                                            <tr class="text-left text-emerald-800/80 uppercase tracking-wide border-b border-emerald-200">
+                                                <th class="py-1.5 pr-2">Person</th>
+                                                <th class="py-1.5 pr-2">Lendings</th>
+                                                <th class="py-1.5 pr-2">Recovered</th>
+                                                <th class="py-1.5 pr-2">Total Lent</th>
+                                                <th class="py-1.5 pr-2">Total Repaid</th>
+                                                <th class="py-1.5 pr-2">Remaining</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="ledger-person-summary-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
                             <div id="ledger-empty-state" class="text-center py-10 text-gray-500">
                                 <i class="fas fa-book-open text-4xl mb-2 opacity-50"></i>
                                 <p>No ledger entries yet.</p>
                             </div>
                             <div id="ledger-mobile-cards" class="ledger-mobile-cards hidden space-y-3 mb-3"></div>
-                            <div class="ledger-table-container overflow-x-auto max-h-[420px]">
+                            <div class="ledger-table-container overflow-x-auto">
                                 <table class="ledger-table min-w-full text-sm">
                                     <thead>
                                         <tr class="text-left text-xs uppercase tracking-wide text-gray-500 border-b border-gray-200">
@@ -1181,7 +1209,6 @@
                                             <th class="py-2 pr-3">Contact/Note</th>
                                             <th class="py-2 pr-3">Ref Month</th>
                                             <th class="py-2 pr-3">Person</th>
-                                            <th class="py-2 pr-3">Status</th>
                                             <th class="py-2 text-right">Actions</th>
                                         </tr>
                                     </thead>
@@ -3713,6 +3740,7 @@
             let financialLedger = [];
             let savingsGoals = [];
             let editingLedgerEntryId = null;
+            let activeLedgerMiniTab = 'all';
             let currentIncomeFilters = {
                 source: '',
                 user: '',
@@ -3778,6 +3806,13 @@
                 return normalized;
             }
 
+            function mergeSalaryTargetsMaps(...maps) {
+                return maps.reduce((accumulator, map) => {
+                    const normalizedMap = normalizeSalaryTargetsMap(map || {});
+                    return Object.assign(accumulator, normalizedMap);
+                }, {});
+            }
+
             function readLegacySalaryTargetsFromStorage() {
                 try {
                     return normalizeSalaryTargetsMap(JSON.parse(localStorage.getItem(LEGACY_SALARY_TARGETS_STORAGE_KEY) || '{}'));
@@ -3798,10 +3833,10 @@
                     const snapshot = await settingsRef.get();
                     const firestoreTargets = snapshot.exists ? normalizeSalaryTargetsMap((snapshot.data() && snapshot.data().salaryTargetsByMonth) || {}) : {};
                     const legacyTargets = readLegacySalaryTargetsFromStorage();
-                    const mergedTargets = Object.keys(firestoreTargets).length ? firestoreTargets : legacyTargets;
+                    const mergedTargets = mergeSalaryTargetsMaps(salaryTargetsByMonth, legacyTargets, firestoreTargets);
                     salaryTargetsByMonth = mergedTargets;
 
-                    if (!Object.keys(firestoreTargets).length && Object.keys(legacyTargets).length) {
+                    if (!snapshot.exists && Object.keys(legacyTargets).length) {
                         await settingsRef.set({
                             userId: currentUser.uid,
                             userEmail: (currentUser.email || '').toLowerCase(),
@@ -4078,11 +4113,14 @@
                 function applySalaryTargetsSnapshot(snapshot) {
                     if (snapshot && snapshot.exists) {
                         const data = snapshot.data() || {};
-                        salaryTargetsByMonth = normalizeSalaryTargetsMap(data.salaryTargetsByMonth || {});
+                        salaryTargetsByMonth = mergeSalaryTargetsMaps(salaryTargetsByMonth, readLegacySalaryTargetsFromStorage(), data.salaryTargetsByMonth || {});
                     } else {
-                        salaryTargetsByMonth = readLegacySalaryTargetsFromStorage();
+                        salaryTargetsByMonth = mergeSalaryTargetsMaps(salaryTargetsByMonth, readLegacySalaryTargetsFromStorage());
                     }
-                    renderLedgerSection();
+                    const ledgerTab = document.getElementById('ledger-tab');
+                    if (ledgerTab && !ledgerTab.classList.contains('hidden')) {
+                        renderLedgerSection();
+                    }
                 }
 
                 function mapExpenseSnapshot(snapshot, targetMap) {
@@ -4171,7 +4209,7 @@
                 }
 
                 function checkSyncComplete() {
-                    if (syncCompleted.expenses && syncCompleted.incomes && syncCompleted.ledger) {
+                    if (syncCompleted.expenses && syncCompleted.incomes) {
                         if (!initialSyncNotified && typeof options.onInitialSyncComplete === 'function') {
                             initialSyncNotified = true;
                             options.onInitialSyncComplete();
@@ -5356,7 +5394,7 @@
                 doc.setTextColor(recoveryColor[0], recoveryColor[1], recoveryColor[2]);
                 doc.text(`Recovery: ${formatUSD(ledger.totalRecovery)}`, boxX + boxW / 2 + 12, startY + 48);
                 doc.setTextColor(salaryColor[0], salaryColor[1], salaryColor[2]);
-                doc.text(`Salary Partial: ${formatUSD(ledger.totalSalary)}`, boxX + boxW / 2 + 12, startY + 62);
+                doc.text(`Salary Payment: ${formatUSD(ledger.totalSalary)}`, boxX + boxW / 2 + 12, startY + 62);
                 doc.setTextColor(netColor[0], netColor[1], netColor[2]);
                 doc.text(`Net Effect: ${formatUSD(ledger.netImpact)}`, boxX + boxW / 2 + 12, startY + 76);
 
@@ -5843,26 +5881,209 @@
                 showMessage(`Successfully exported ${filteredData.length} transactions to PDF!`, 'success');
             }
 
-            function getLedgerFilterContext() {
-                const monthKey = (document.getElementById('ledger-month-focus') && document.getElementById('ledger-month-focus').value) || getCurrentMonth();
-                const filterDropdown = document.getElementById('ledger-view-filter');
-                const filterMode = filterDropdown ? filterDropdown.value : 'selected-month';
-                const statusDropdown = document.getElementById('ledger-status-filter');
-                const statusFilter = statusDropdown ? statusDropdown.value : 'all';
+            function normalizeLedgerPersonKey(value) {
+                const normalized = normalizeCategoryName(value || 'Unknown');
+                return (normalized || 'Unknown').toLowerCase();
+            }
 
-                let rows = [...financialLedger];
-                if (filterMode === 'selected-month') {
-                    rows = rows.filter(item => shouldShowLedgerRow(item, monthKey));
-                } else if (filterMode === 'all-pending') {
-                    rows = rows.filter(item => item.type === LEDGER_TYPES.LENDING && item.status === 'pending');
-                } else if (filterMode === 'salary-partial-month') {
-                    rows = rows.filter(item => item.type === LEDGER_TYPES.SALARY_PARTIAL && getLedgerViewMonthKey(item) === monthKey);
-                } else if (filterMode === 'salary-partial-all') {
-                    rows = rows.filter(item => item.type === LEDGER_TYPES.SALARY_PARTIAL);
+            function getLedgerPersonBalances(entries) {
+                const personMap = new Map();
+
+                (entries || []).forEach(item => {
+                    if (!item || (item.type !== LEDGER_TYPES.LENDING && item.type !== LEDGER_TYPES.RECOVERY)) return;
+                    const amount = Number(item.amount || 0);
+                    if (!(amount > 0)) return;
+                    const displayName = normalizeCategoryName(item.person_name || '') || 'Unknown';
+                    const key = normalizeLedgerPersonKey(displayName);
+                    const current = personMap.get(key) || {
+                        person: displayName,
+                        lendingCount: 0,
+                        recoveryCount: 0,
+                        totalLent: 0,
+                        totalRecovered: 0
+                    };
+
+                    if (item.type === LEDGER_TYPES.LENDING) {
+                        current.lendingCount += 1;
+                        current.totalLent += amount;
+                    }
+                    if (item.type === LEDGER_TYPES.RECOVERY) {
+                        current.recoveryCount += 1;
+                        current.totalRecovered += amount;
+                    }
+
+                    personMap.set(key, current);
+                });
+
+                return Array.from(personMap.values()).map(item => ({
+                    ...item,
+                    remainingDebt: Math.max(0, item.totalLent - item.totalRecovered),
+                    creditBalance: Math.max(0, item.totalRecovered - item.totalLent)
+                })).sort((a, b) => {
+                    if (b.remainingDebt !== a.remainingDebt) return b.remainingDebt - a.remainingDebt;
+                    return b.totalRecovered - a.totalRecovered;
+                });
+            }
+
+            function updateLedgerMiniTabButtons() {
+                const buttons = document.querySelectorAll('#ledger-mini-tabs .ledger-mini-tab-btn');
+                buttons.forEach(btn => {
+                    const tab = btn.getAttribute('data-ledger-mini-tab') || 'all';
+                    const isActive = tab === activeLedgerMiniTab;
+                    btn.classList.toggle('border-indigo-200', isActive);
+                    btn.classList.toggle('bg-indigo-50', isActive);
+                    btn.classList.toggle('text-indigo-700', isActive);
+                    btn.classList.toggle('border-gray-200', !isActive);
+                    btn.classList.toggle('bg-white', !isActive);
+                    btn.classList.toggle('text-gray-700', !isActive);
+                });
+            }
+
+            function renderLedgerPersonSummary(miniTab) {
+                const panel = document.getElementById('ledger-person-summary');
+                const titleEl = document.getElementById('ledger-person-summary-title');
+                const bodyEl = document.getElementById('ledger-person-summary-body');
+                if (!panel || !titleEl || !bodyEl) return;
+
+                const shouldShow = miniTab === 'lending' || miniTab === 'recovery';
+                if (!shouldShow) {
+                    panel.classList.add('hidden');
+                    bodyEl.innerHTML = '';
+                    return;
                 }
 
-                if (statusFilter === 'pending' || statusFilter === 'completed') {
-                    rows = rows.filter(item => item.status === statusFilter);
+                const balances = getLedgerPersonBalances(financialLedger);
+                const rows = balances.filter(item => miniTab === 'lending' ? item.lendingCount > 0 : item.recoveryCount > 0);
+                titleEl.textContent = miniTab === 'lending' ? 'Lending by person (all time)' : 'Recovery by person (all time)';
+
+                if (!rows.length) {
+                    panel.classList.remove('hidden');
+                    bodyEl.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-emerald-700/80">No data found for this tab.</td></tr>';
+                    return;
+                }
+
+                bodyEl.innerHTML = rows.map(item => {
+                    const remainingText = item.remainingDebt > 0 ? formatUSD(item.remainingDebt) : (item.creditBalance > 0 ? `Credit ${formatUSD(item.creditBalance)}` : formatUSD(0));
+                    const remainingClass = item.remainingDebt > 0 ? 'text-red-700 font-bold' : 'text-emerald-700 font-bold';
+                    return `
+                        <tr class="border-b border-emerald-100/80">
+                            <td class="py-1.5 pr-2 font-semibold text-emerald-900">${item.person}</td>
+                            <td class="py-1.5 pr-2 text-emerald-800">${item.lendingCount}</td>
+                            <td class="py-1.5 pr-2 text-emerald-800">${item.recoveryCount}</td>
+                            <td class="py-1.5 pr-2 text-red-700 font-semibold">${formatUSD(item.totalLent)}</td>
+                            <td class="py-1.5 pr-2 text-green-700 font-semibold">${formatUSD(item.totalRecovered)}</td>
+                            <td class="py-1.5 pr-2 ${remainingClass}">${remainingText}</td>
+                        </tr>
+                    `;
+                }).join('');
+                panel.classList.remove('hidden');
+            }
+
+            function getMonthBounds(monthKey) {
+                if (!monthKey || !/^\d{4}-\d{2}$/.test(monthKey)) {
+                    return {
+                        startDate: '',
+                        endDate: ''
+                    };
+                }
+                const [yearPart, monthPart] = monthKey.split('-').map(v => parseInt(v, 10));
+                const lastDay = new Date(yearPart, monthPart, 0).getDate();
+                return {
+                    startDate: `${monthKey}-01`,
+                    endDate: `${monthKey}-${String(lastDay).padStart(2, '0')}`
+                };
+            }
+
+            function getYearBounds(yearValue) {
+                const year = parseInt(String(yearValue || ''), 10);
+                if (!Number.isFinite(year) || year < 1900) {
+                    return {
+                        startDate: '',
+                        endDate: ''
+                    };
+                }
+                return {
+                    startDate: `${year}-01-01`,
+                    endDate: `${year}-12-31`
+                };
+            }
+
+            function getLedgerDateRangeContext() {
+                const monthInput = document.getElementById('ledger-range-month');
+                const yearInput = document.getElementById('ledger-range-year');
+                const startInput = document.getElementById('ledger-range-start');
+                const endInput = document.getElementById('ledger-range-end');
+
+                const monthKey = monthInput ? (monthInput.value || '') : '';
+                const yearValue = yearInput ? String(yearInput.value || '').trim() : '';
+                const customStart = startInput ? (startInput.value || '') : '';
+                const customEnd = endInput ? (endInput.value || '') : '';
+
+                if (customStart && customEnd && customStart <= customEnd) {
+                    return {
+                        mode: 'custom',
+                        startDate: customStart,
+                        endDate: customEnd,
+                        label: `${customStart} to ${customEnd}`,
+                        fileSuffix: `${customStart}_${customEnd}`,
+                        monthKeyForCarry: ''
+                    };
+                }
+
+                if (monthKey) {
+                    const bounds = getMonthBounds(monthKey);
+                    return {
+                        mode: 'month',
+                        startDate: bounds.startDate,
+                        endDate: bounds.endDate,
+                        label: `Reference month ${monthKey}`,
+                        fileSuffix: monthKey,
+                        monthKeyForCarry: monthKey
+                    };
+                }
+
+                if (yearValue) {
+                    const bounds = getYearBounds(yearValue);
+                    if (bounds.startDate && bounds.endDate) {
+                        return {
+                            mode: 'year',
+                            startDate: bounds.startDate,
+                            endDate: bounds.endDate,
+                            label: `Year ${yearValue}`,
+                            fileSuffix: `year-${yearValue}`,
+                            monthKeyForCarry: ''
+                        };
+                    }
+                }
+
+                return {
+                    mode: 'all',
+                    startDate: '',
+                    endDate: '',
+                    label: 'All months',
+                    fileSuffix: 'all-months',
+                    monthKeyForCarry: ''
+                };
+            }
+
+            function getLedgerFilterContext() {
+                const miniTab = activeLedgerMiniTab || 'all';
+                const range = getLedgerDateRangeContext();
+
+                let rows = [...financialLedger];
+                if (range.startDate && range.endDate) {
+                    rows = rows.filter(item => {
+                        const reportDate = getLedgerReportDate(item) || item.entry_date || '';
+                        return isDateWithinRange(reportDate, range.startDate, range.endDate);
+                    });
+                }
+
+                if (miniTab === 'lending') {
+                    rows = rows.filter(item => item.type === LEDGER_TYPES.LENDING);
+                } else if (miniTab === 'recovery') {
+                    rows = rows.filter(item => item.type === LEDGER_TYPES.RECOVERY);
+                } else if (miniTab === 'salary') {
+                    rows = rows.filter(item => item.type === LEDGER_TYPES.SALARY_PARTIAL);
                 }
 
                 rows.sort((a, b) => {
@@ -5875,32 +6096,25 @@
                     return 0;
                 });
 
-                let label = `Reference month ${monthKey}`;
-                let fileSuffix = monthKey;
-                if (filterMode === 'all-months') {
-                    label = 'All months';
-                    fileSuffix = 'all-months';
-                } else if (filterMode === 'all-pending') {
-                    label = 'All pending lending';
-                    fileSuffix = 'all-pending';
-                } else if (filterMode === 'salary-partial-month') {
-                    label = `Salary partial (${monthKey})`;
-                    fileSuffix = `salary-partial_${monthKey}`;
-                } else if (filterMode === 'salary-partial-all') {
-                    label = 'Salary partial (all months)';
-                    fileSuffix = 'salary-partial-all-months';
-                }
+                let label = range.label;
+                let fileSuffix = range.fileSuffix;
 
-                if (statusFilter !== 'all') {
-                    const statusSuffix = statusFilter === 'completed' ? 'completed' : 'pending';
-                    label = `${label} | Status: ${statusSuffix}`;
-                    fileSuffix = `${fileSuffix}_${statusSuffix}`;
+                const tabSuffix = miniTab === 'all' ? 'all' : miniTab;
+                const tabLabel = miniTab === 'all' ? 'All entries' : (miniTab === 'salary' ? 'Salary payment' : miniTab.charAt(0).toUpperCase() + miniTab.slice(1));
+                label = `${tabLabel} | ${label}`;
+                fileSuffix = `${tabSuffix}_${fileSuffix}`;
+
+                if (miniTab === 'lending' || miniTab === 'recovery') {
+                    fileSuffix = `${fileSuffix}_nostatus`;
                 }
 
                 return {
-                    monthKey,
-                    filterMode,
-                    statusFilter,
+                    monthKey: range.monthKeyForCarry || '',
+                    filterMode: range.mode,
+                    miniTab,
+                    startDate: range.startDate,
+                    endDate: range.endDate,
+                    monthKeyForCarry: range.monthKeyForCarry,
                     rows,
                     label,
                     fileSuffix
@@ -5913,7 +6127,7 @@
 
             function convertToLedgerCSV(data) {
                 const headers = [
-                    'Date', 'Type', 'Original Amount', 'Currency', 'Amount (USD)', 'Ref Month', 'Person Name', 'Status', 'Ledger ID'
+                    'Date', 'Type', 'Original Amount', 'Currency', 'Amount (USD)', 'Ref Month', 'Person Name', 'Ledger ID'
                 ];
                 const rows = data.map(item => [
                     `"${item.entry_date || ''}"`,
@@ -5923,7 +6137,6 @@
                     Number(item.amount || 0).toFixed(2),
                     `"${item.ref_month || ''}"`,
                     `"${String(item.person_name || '').replace(/"/g, '""')}"`,
-                    `"${item.status || ''}"`,
                     `"${item.id || ''}"`
                 ].join(','));
 
@@ -5961,7 +6174,8 @@
                     monthKey,
                     label,
                     fileSuffix,
-                    filterMode
+                    filterMode,
+                    miniTab
                 } = getLedgerFilterContext();
                 if (!rows.length) {
                     showMessage('No ledger data to export for the selected view.', 'info');
@@ -5980,13 +6194,12 @@
                     baseFont
                 } = pdfBase;
 
-                const totalsOptions = filterMode === 'all-months' || filterMode === 'all-pending' || filterMode === 'salary-partial-all' ? {} : {
-                    monthKey
-                };
-                const ledgerTotals = calculateFinancialLedgerTotals(rows, totalsOptions);
+                const sortedRows = sortLedgerRowsForPdf(rows);
+
+                const ledgerTotals = calculateFinancialLedgerTotals(rows, {});
                 const ledgerSummary = {
                     ...ledgerTotals,
-                    rowCount: rows.length,
+                    rowCount: sortedRows.length,
                     viewLabel: label
                 };
                 const titleText = 'Ledger Transactions Report';
@@ -5998,16 +6211,15 @@
                     SALARY_PARTIAL: [37, 99, 235]
                 };
 
-                const body = rows.map((item, index) => ({
+                const body = sortedRows.map((item, index) => ({
                     idx: index + 1,
                     date: item.entry_date || '-',
                     type: item.type || '-',
                     originalAmount: item.currency === 'KHR' ?
                         `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} KHR)` : `${formatUSD(item.amount || 0)} (~${Number(item.original_amount || item.amount || 0).toLocaleString('en-US')} USD)`,
                     amount: formatUsd(item.amount || 0),
-                    refMonth: item.ref_month || '-',
-                    person: normalizePdfText(item.person_name || '-'),
-                    status: item.status || 'pending'
+                    refMonth: formatLedgerMonthLabel(item.ref_month || '-'),
+                    person: normalizePdfText(item.person_name || '-')
                 }));
 
                 doc.autoTable({
@@ -6033,9 +6245,6 @@
                     }, {
                         header: 'Person',
                         dataKey: 'person'
-                    }, {
-                        header: 'Status',
-                        dataKey: 'status'
                     }],
                     body,
                     styles: {
@@ -6080,9 +6289,6 @@
                         person: {
                             cellWidth: 'auto',
                             minCellWidth: 72
-                        },
-                        status: {
-                            cellWidth: 42
                         }
                     },
                     margin: {
@@ -6099,10 +6305,6 @@
                             const typeValue = data.row.raw.type || '';
                             const typeColor = typeStyles[typeValue] || [75, 85, 99];
                             data.cell.styles.textColor = typeColor;
-                            data.cell.styles.fontStyle = 'bold';
-                        }
-                        if (data.section === 'body' && data.column.dataKey === 'status') {
-                            data.cell.styles.textColor = data.row.raw.status === 'completed' ? [22, 163, 74] : [234, 88, 12];
                             data.cell.styles.fontStyle = 'bold';
                         }
                         if (data.section === 'body' && data.column.dataKey === 'amount') {
@@ -6164,14 +6366,20 @@
                 const type = normalizeLedgerType(document.getElementById('ledger-type') ? document.getElementById('ledger-type').value : '');
                 const refMonthInput = document.getElementById('ledger-ref-month');
                 const personInput = document.getElementById('ledger-person-name');
-                if (!refMonthInput || !personInput) return;
+                const statusInput = document.getElementById('ledger-status');
+                const statusField = document.querySelector('.ledger-field-status');
+                if (!refMonthInput || !personInput || !statusInput) return;
 
                 refMonthInput.required = type === LEDGER_TYPES.SALARY_PARTIAL;
                 if (type === LEDGER_TYPES.SALARY_PARTIAL) {
                     if (!refMonthInput.value) refMonthInput.value = getCurrentMonth();
-                    personInput.placeholder = 'Optional for salary partial';
+                    personInput.placeholder = 'Optional for salary payment';
+                    if (statusField) statusField.classList.remove('hidden');
                 } else {
                     personInput.placeholder = 'Required for lending/recovery';
+                    if (statusField) statusField.classList.add('hidden');
+                    if (type === LEDGER_TYPES.LENDING) statusInput.value = 'pending';
+                    if (type === LEDGER_TYPES.RECOVERY) statusInput.value = 'completed';
                 }
             }
 
@@ -6347,7 +6555,7 @@
                 const originalAmount = parseFloat(ledgerData.amount);
                 const currency = ledgerData.currency === 'KHR' ? 'KHR' : 'USD';
                 const amount = convertToUSD(originalAmount, currency);
-                const status = ledgerData.status === 'completed' ? 'completed' : 'pending';
+                const status = type === LEDGER_TYPES.LENDING ? 'pending' : (type === LEDGER_TYPES.RECOVERY ? 'completed' : (ledgerData.status === 'completed' ? 'completed' : 'pending'));
                 const personName = normalizeCategoryName(ledgerData.person_name || '');
                 const contactNote = String(ledgerData.contact_note || '').trim();
                 const entryDate = ledgerData.entry_date || new Date().toISOString().split('T')[0];
@@ -6357,7 +6565,7 @@
                 if (!originalAmount || originalAmount <= 0) return showMessage('Amount must be greater than zero.', 'error');
                 if (!amount || amount <= 0) return showMessage('Converted USD amount must be greater than zero.', 'error');
                 if (!entryDate) return showMessage('Entry date is required.', 'error');
-                if (type === LEDGER_TYPES.SALARY_PARTIAL && !refMonth) return showMessage('Ref month is required for salary partial.', 'error');
+                if (type === LEDGER_TYPES.SALARY_PARTIAL && !refMonth) return showMessage('Ref month is required for salary payment.', 'error');
                 if ((type === LEDGER_TYPES.LENDING || type === LEDGER_TYPES.RECOVERY) && !personName) {
                     return showMessage('Person name is required for lending/recovery.', 'error');
                 }
@@ -6464,13 +6672,15 @@
                 const {
                     monthKey,
                     filterMode,
-                    statusFilter,
+                    miniTab,
+                    monthKeyForCarry,
                     rows
                 } = getLedgerFilterContext();
 
-                const monthTotals = calculateFinancialLedgerTotals(financialLedger, {
-                    monthKey
-                });
+                updateLedgerMiniTabButtons();
+                renderLedgerPersonSummary(miniTab);
+
+                const monthTotals = calculateFinancialLedgerTotals(rows, {});
 
                 const totalLendingEl = document.getElementById('ledger-total-lending');
                 const totalRecoveryEl = document.getElementById('ledger-total-recovery');
@@ -6488,19 +6698,15 @@
                     tableBody.innerHTML = '';
                     mobileCardsContainer.innerHTML = '';
                     let emptyMessage = 'មិនមានទិន្នន័យសម្រាប់ខែនេះទេ';
-                    if (filterMode === 'all-months') {
+                    if (filterMode === 'all') {
                         emptyMessage = 'មិនមានទិន្នន័យប្រតិបត្តិការនៅឡើយទេ';
-                    } else if (filterMode === 'all-pending') {
-                        emptyMessage = 'មិនមានបំណុល pending ទេ';
-                    } else if (filterMode === 'salary-partial-month') {
-                        emptyMessage = 'មិនមានទិន្នន័យ Salary Partial សម្រាប់ខែនេះទេ';
-                    } else if (filterMode === 'salary-partial-all') {
-                        emptyMessage = 'មិនមានទិន្នន័យ Salary Partial នៅឡើយទេ';
                     }
-                    if (statusFilter === 'pending') {
-                        emptyMessage += ' (Status: pending)';
-                    } else if (statusFilter === 'completed') {
-                        emptyMessage += ' (Status: completed)';
+                    if (miniTab === 'salary') {
+                        emptyMessage = 'មិនមានទិន្នន័យ Salary Payment នៅឡើយទេ';
+                    } else if (miniTab === 'lending') {
+                        emptyMessage = filterMode === 'all' ? 'មិនមានទិន្នន័យ Lending នៅឡើយទេ' : 'មិនមានទិន្នន័យ Lending សម្រាប់កាលបរិច្ឆេទដែលបានជ្រើស';
+                    } else if (miniTab === 'recovery') {
+                        emptyMessage = filterMode === 'all' ? 'មិនមានទិន្នន័យ Recovery នៅឡើយទេ' : 'មិនមានទិន្នន័យ Recovery សម្រាប់កាលបរិច្ឆេទដែលបានជ្រើស';
                     }
                     emptyState.innerHTML = `<i class="fas fa-book-open text-4xl mb-2 opacity-50"></i><p>${emptyMessage}</p>`;
                     emptyState.classList.remove('hidden');
@@ -6510,7 +6716,7 @@
                         const typeColor = item.type === LEDGER_TYPES.LENDING ? 'text-red-600' : (item.type === LEDGER_TYPES.RECOVERY ? 'text-green-600' : 'text-blue-600');
                         const displayCurrency = item.currency === 'KHR' ? 'KHR' : 'USD';
                         const displayOriginalAmount = Number(item.original_amount || item.amount || 0);
-                        const carryOver = filterMode === 'selected-month' ? isCarryOverPendingLending(item, monthKey) : false;
+                        const carryOver = monthKeyForCarry ? isCarryOverPendingLending(item, monthKeyForCarry) : false;
                         const typeRowClass = item.type === LEDGER_TYPES.LENDING ? 'ledger-row-lending' : (item.type === LEDGER_TYPES.RECOVERY ? 'ledger-row-recovery' : 'ledger-row-salary');
                         const rowClass = `${typeRowClass} ${carryOver ? 'border-b border-yellow-200 bg-yellow-50/70 ledger-row-carry' : 'border-b border-gray-100'}`;
                         const statusBadge = carryOver ? '<span class="ml-2 inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-[11px] font-bold text-yellow-800">Carry Over</span>' : '';
@@ -6523,12 +6729,6 @@
                             <td class="py-2 pr-3 text-gray-600 text-xs">${item.contact_note ? normalizePdfText(item.contact_note) : '-'}</td>
                             <td class="py-2 pr-3 text-gray-600">${item.ref_month || '-'}</td>
                             <td class="py-2 pr-3 text-gray-600">${item.person_name || '-'}</td>
-                            <td class="py-2 pr-3">
-                                <select class="glass-input rounded-lg text-xs ledger-status-select" onchange="toggleFinancialLedgerStatus('${item.id}', this.value)">
-                                    <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>pending</option>
-                                    <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>completed</option>
-                                </select>
-                            </td>
                             <td class="py-2 text-right">
                                 <div class="ledger-row-actions inline-flex items-center gap-2">
                                     <button class="ledger-action-btn ledger-action-btn-edit" onclick="editFinancialLedgerEntry('${item.id}')">Edit</button>
@@ -6542,7 +6742,7 @@
                         const typeColor = item.type === LEDGER_TYPES.LENDING ? 'text-red-600' : (item.type === LEDGER_TYPES.RECOVERY ? 'text-green-600' : 'text-blue-600');
                         const displayCurrency = item.currency === 'KHR' ? 'KHR' : 'USD';
                         const displayOriginalAmount = Number(item.original_amount || item.amount || 0);
-                        const carryOver = filterMode === 'selected-month' ? isCarryOverPendingLending(item, monthKey) : false;
+                        const carryOver = monthKeyForCarry ? isCarryOverPendingLending(item, monthKeyForCarry) : false;
                         const carryBadge = carryOver ? '<span class="ledger-mobile-badge">Carry Over</span>' : '';
                         const amountDisplay = displayCurrency === 'KHR' ? `៛ ${displayOriginalAmount.toLocaleString()} (${formatUSD(item.amount || 0)})` : formatUSD(item.amount || 0);
                         const contactNote = item.contact_note ? normalizePdfText(item.contact_note) : '-';
@@ -6572,21 +6772,19 @@
                                 <span class="ledger-mobile-ref">Ref: ${item.ref_month || '-'}</span>
                                 ${carryBadge}
                             </div>
-                            <div class="ledger-mobile-bottom-row">
-                                <span class="ledger-mobile-status-label">Status:</span>
-                                <select class="glass-input rounded-lg text-xs ledger-status-select" onchange="toggleFinancialLedgerStatus('${item.id}', this.value)">
-                                    <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>pending</option>
-                                    <option value="completed" ${item.status === 'completed' ? 'selected' : ''}>completed</option>
-                                </select>
-                            </div>
                             <div class="ledger-mobile-note">Note: ${contactNote}</div>
                         </article>`;
                     }).join('');
                 }
 
-                // Update progress bar with dual-currency
-                const targetDisplay = getSalaryTargetDisplay(monthKey);
-                const received = monthTotals.totalSalary;
+                // Update progress bar with dual-currency using the selected salary target month only.
+                const salaryTargetMonthInput = document.getElementById('ledger-month-focus');
+                const salaryTargetMonthKey = salaryTargetMonthInput && salaryTargetMonthInput.value ? salaryTargetMonthInput.value : getCurrentMonth();
+                const targetDisplay = getSalaryTargetDisplay(salaryTargetMonthKey);
+                const salaryMonthTotals = calculateFinancialLedgerTotals(financialLedger, {
+                    monthKey: salaryTargetMonthKey
+                });
+                const received = salaryMonthTotals.totalSalary;
                 const percent = targetDisplay.usd > 0 ? Math.min(100, (received / targetDisplay.usd) * 100) : 0;
 
                 const progressText = document.getElementById('ledger-progress-text');
@@ -6624,6 +6822,11 @@
                 const amount = parseFloat(targetInput.value) || 0;
                 const currency = currencySelect.value || 'USD';
 
+                if (amount <= 0) {
+                    showMessage('Please enter a salary target greater than 0.', 'error');
+                    return;
+                }
+
                 const targetUsd = currency === 'KHR' ? convertToUSD(amount, 'KHR') : amount;
                 const confirmMsg = currency === 'KHR' ?
                     `Save salary target ៛ ${amount.toLocaleString()} (~${formatUSD(targetUsd)}) for ${monthKey}?` :
@@ -6641,6 +6844,7 @@
 
                 try {
                     await saveSalaryTargets();
+                    await loadSalaryTargetsFromFirestore();
                     showMessage('Salary target saved.', 'success');
                 } catch (err) {
                     console.error('Failed to save salary target:', err);
@@ -6672,9 +6876,9 @@
                     }
                 }
 
-                const normalizedCategory = isLinkedSavingsExpense
-                    ? (normalizeCategoryName('Savings') || 'Savings')
-                    : normalizeCategoryName(expenseData.category);
+                const normalizedCategory = isLinkedSavingsExpense ?
+                    (normalizeCategoryName('Savings') || 'Savings') :
+                    normalizeCategoryName(expenseData.category);
                 if (!normalizedCategory) return showMessage('Category is required.', 'error');
 
                 const submitBtn = document.getElementById('submit-button');
@@ -8500,7 +8704,7 @@
                         Total Income for selected month: <span class="text-green-600 font-bold text-2xl ml-2">${formatUSD(totalMonthIncome)}</span>
                     </p>
                     <p class="text-sm font-medium text-gray-700 mt-2">
-                        Salary Partial: <span class="text-blue-600 font-bold ml-1">${formatUSD(ledgerMonthTotals.totalSalary)}</span> |
+                        Salary Payment: <span class="text-blue-600 font-bold ml-1">${formatUSD(ledgerMonthTotals.totalSalary)}</span> |
                         Recovery: <span class="text-green-600 font-bold ml-1">${formatUSD(ledgerMonthTotals.totalRecovery)}</span> |
                         Lending: <span class="text-red-600 font-bold ml-1">${formatUSD(ledgerMonthTotals.totalLending)}</span>
                     </p>
@@ -8730,6 +8934,51 @@
                 return entry.entry_date || '';
             }
 
+            function formatLedgerMonthLabel(monthValue) {
+                const rawValue = String(monthValue || '').trim();
+                if (!rawValue || rawValue === '-') return '-';
+
+                const match = rawValue.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);
+                if (!match) return rawValue;
+
+                const year = parseInt(match[1], 10);
+                const month = parseInt(match[2], 10);
+                if (!Number.isFinite(year) || !Number.isFinite(month) || month < 1 || month > 12) return rawValue;
+
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+
+                return `${monthNames[month - 1]} ${year}`;
+            }
+
+            function getLedgerPdfSortDate(entry) {
+                if (!entry) return '';
+                const reportDate = getLedgerReportDate(entry) || entry.entry_date || '';
+                if (reportDate) return reportDate;
+                if (entry.ref_month) return `${entry.ref_month}-01`;
+                return '';
+            }
+
+            function sortLedgerRowsForPdf(rows) {
+                return (rows || []).slice().sort((left, right) => {
+                    const leftDate = getLedgerPdfSortDate(left);
+                    const rightDate = getLedgerPdfSortDate(right);
+                    if (leftDate < rightDate) return -1;
+                    if (leftDate > rightDate) return 1;
+
+                    const leftRef = String(left.ref_month || '');
+                    const rightRef = String(right.ref_month || '');
+                    if (leftRef < rightRef) return -1;
+                    if (leftRef > rightRef) return 1;
+
+                    const leftType = String(left.type || '');
+                    const rightType = String(right.type || '');
+                    return leftType.localeCompare(rightType);
+                });
+            }
+
             function formatKhrEquivalent(amount) {
                 const rate = getExchangeRate();
                 const khrValue = (Number(amount) || 0) * rate;
@@ -8794,7 +9043,7 @@
                         type: 'ledger',
                         ledger_type: entry.type || '',
                         date: reportDate || entry.entry_date || '',
-                        description: entry.type === LEDGER_TYPES.SALARY_PARTIAL ? 'Salary Partial' : (entry.person_name || entry.type || ''),
+                        description: entry.type === LEDGER_TYPES.SALARY_PARTIAL ? 'Salary Payment' : (entry.person_name || entry.type || ''),
                         user: entry.userEmail || '',
                         original_amount: Number(entry.original_amount || entry.amount || 0),
                         currency: entry.currency === 'KHR' ? 'KHR' : 'USD',
@@ -8824,34 +9073,86 @@
                 const cutoffTime = new Date(`${cutoffDate}T23:59:59`).getTime();
 
                 (financialLedger || []).forEach(entry => {
-                    if (entry.type !== LEDGER_TYPES.LENDING || entry.status !== 'pending') return;
-                    const entryDate = entry.entry_date || '';
-                    if (entryDate && entryDate > cutoffDate) return;
-                    const person = entry.person_name || 'Unknown';
+                    if (!entry || (entry.type !== LEDGER_TYPES.LENDING && entry.type !== LEDGER_TYPES.RECOVERY)) return;
+
+                    const reportDate = getLedgerReportDate(entry) || entry.entry_date || '';
+                    if (reportDate && reportDate > cutoffDate) return;
+
+                    const personDisplay = normalizeCategoryName(entry.person_name || '') || 'Unknown';
+                    const personKey = personDisplay.toLowerCase();
                     const amount = Number(entry.amount || 0);
+                    if (!(amount > 0)) return;
                     const note = String(entry.contact_note || '').trim();
-                    const current = debtMap.get(person) || {
-                        person,
-                        count: 0,
-                        amount: 0,
-                        oldestDate: entryDate,
-                        latestDate: entryDate,
-                        contactNote: note,
-                        ageDays: 0
+                    const current = debtMap.get(personKey) || {
+                        person: personDisplay,
+                        lendings: [],
+                        recoveryAmount: 0,
+                        contactNote: note
                     };
-                    current.count += 1;
-                    current.amount += amount;
-                    if (!current.oldestDate || (entryDate && entryDate < current.oldestDate)) current.oldestDate = entryDate;
-                    if (!current.latestDate || (entryDate && entryDate > current.latestDate)) current.latestDate = entryDate;
+
                     if (!current.contactNote && note) current.contactNote = note;
-                    if (current.oldestDate) {
-                        const oldestTime = new Date(`${current.oldestDate}T00:00:00`).getTime();
-                        current.ageDays = Math.max(0, Math.floor((cutoffTime - oldestTime) / (1000 * 60 * 60 * 24)));
+
+                    if (entry.type === LEDGER_TYPES.LENDING && entry.status === 'pending') {
+                        const entryDate = entry.entry_date || reportDate || '';
+                        current.lendings.push({
+                            date: entryDate,
+                            amount
+                        });
                     }
-                    debtMap.set(person, current);
+
+                    if (entry.type === LEDGER_TYPES.RECOVERY) {
+                        current.recoveryAmount += amount;
+                    }
+
+                    debtMap.set(personKey, current);
                 });
 
-                return Array.from(debtMap.values()).sort((a, b) => b.amount - a.amount);
+                const results = [];
+
+                debtMap.forEach(current => {
+                    if (!current.lendings.length) return;
+
+                    const sortedLendings = current.lendings
+                        .slice()
+                        .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+
+                    let recoveryLeft = current.recoveryAmount;
+                    const outstandingEntries = [];
+
+                    sortedLendings.forEach(item => {
+                        const applied = Math.min(item.amount, recoveryLeft);
+                        const remaining = item.amount - applied;
+                        recoveryLeft = Math.max(0, recoveryLeft - applied);
+                        if (remaining > 0.000001) {
+                            outstandingEntries.push({
+                                date: item.date,
+                                remaining
+                            });
+                        }
+                    });
+
+                    if (!outstandingEntries.length) return;
+
+                    const oldestDate = outstandingEntries[0].date || '';
+                    const latestDate = outstandingEntries[outstandingEntries.length - 1].date || '';
+                    let ageDays = 0;
+                    if (oldestDate) {
+                        const oldestTime = new Date(`${oldestDate}T00:00:00`).getTime();
+                        ageDays = Math.max(0, Math.floor((cutoffTime - oldestTime) / (1000 * 60 * 60 * 24)));
+                    }
+
+                    results.push({
+                        person: current.person,
+                        count: outstandingEntries.length,
+                        amount: outstandingEntries.reduce((sum, item) => sum + item.remaining, 0),
+                        oldestDate,
+                        latestDate,
+                        contactNote: current.contactNote || '',
+                        ageDays
+                    });
+                });
+
+                return results.sort((a, b) => b.amount - a.amount);
             }
 
             function renderReportAggregation() {
@@ -9569,11 +9870,16 @@
                         renderReportAggregation();
                     }
 
-                    renderLedgerSection();
-
-                    renderCategoryManagementTable();
-                    renderIncomeCategoryManagementTable();
-                    renderUserControlTable();
+                    if (!document.getElementById('ledger-tab').classList.contains('hidden')) {
+                        renderLedgerSection();
+                    }
+                    if (!document.getElementById('category-management-tab').classList.contains('hidden')) {
+                        renderCategoryManagementTable();
+                        renderIncomeCategoryManagementTable();
+                    }
+                    if (!document.getElementById('user-control-tab').classList.contains('hidden')) {
+                        renderUserControlTable();
+                    }
                 });
             }
 
@@ -10591,9 +10897,18 @@
                 const ledgerEntryDate = document.getElementById('ledger-entry-date');
                 const ledgerRefMonth = document.getElementById('ledger-ref-month');
                 const ledgerMonthFocus = document.getElementById('ledger-month-focus');
+                const ledgerRangeMonth = document.getElementById('ledger-range-month');
+                const ledgerRangeYear = document.getElementById('ledger-range-year');
+                const ledgerRangeStart = document.getElementById('ledger-range-start');
+                const ledgerRangeEnd = document.getElementById('ledger-range-end');
                 if (ledgerEntryDate) ledgerEntryDate.value = new Date().toISOString().split('T')[0];
                 if (ledgerRefMonth) ledgerRefMonth.value = getCurrentMonth();
                 if (ledgerMonthFocus) ledgerMonthFocus.value = getCurrentMonth();
+                if (ledgerRangeMonth) ledgerRangeMonth.value = getCurrentMonth();
+                if (ledgerRangeYear) ledgerRangeYear.value = String(new Date().getFullYear());
+                const defaultLedgerBounds = getMonthBounds(getCurrentMonth());
+                if (ledgerRangeStart) ledgerRangeStart.value = defaultLedgerBounds.startDate;
+                if (ledgerRangeEnd) ledgerRangeEnd.value = defaultLedgerBounds.endDate;
                 toggleLedgerOptionalFields();
 
                 // Load custom users from localStorage first
@@ -10683,17 +10998,68 @@
                 if (ledgerCurrencyInput) ledgerCurrencyInput.addEventListener('change', updateLedgerConvertedAmountPreview);
                 const ledgerMonthInput = document.getElementById('ledger-month-focus');
                 if (ledgerMonthInput) ledgerMonthInput.addEventListener('change', renderLedgerSection);
-                const ledgerViewFilter = document.getElementById('ledger-view-filter');
-                if (ledgerViewFilter) ledgerViewFilter.addEventListener('change', renderLedgerSection);
-                const ledgerStatusFilter = document.getElementById('ledger-status-filter');
-                if (ledgerStatusFilter) ledgerStatusFilter.addEventListener('change', renderLedgerSection);
+                const ledgerRangeMonthInput = document.getElementById('ledger-range-month');
+                const ledgerRangeYearInput = document.getElementById('ledger-range-year');
+                const ledgerRangeStartInput = document.getElementById('ledger-range-start');
+                const ledgerRangeEndInput = document.getElementById('ledger-range-end');
+
+                const syncLedgerRangeFromMonth = () => {
+                    if (!ledgerRangeMonthInput || !ledgerRangeMonthInput.value) return;
+                    const monthValue = ledgerRangeMonthInput.value;
+                    const [yearPart] = monthValue.split('-');
+                    const bounds = getMonthBounds(monthValue);
+                    if (ledgerRangeYearInput) ledgerRangeYearInput.value = yearPart;
+                    if (ledgerRangeStartInput) ledgerRangeStartInput.value = bounds.startDate;
+                    if (ledgerRangeEndInput) ledgerRangeEndInput.value = bounds.endDate;
+                };
+
+                if (ledgerRangeMonthInput) {
+                    ledgerRangeMonthInput.addEventListener('change', () => {
+                        syncLedgerRangeFromMonth();
+                        renderLedgerSection();
+                    });
+                }
+                if (ledgerRangeYearInput) {
+                    ledgerRangeYearInput.addEventListener('change', () => {
+                        const yearValue = String(ledgerRangeYearInput.value || '').trim();
+                        if (yearValue && /^\d{4}$/.test(yearValue) && ledgerRangeMonthInput) {
+                            const existingMonth = ledgerRangeMonthInput.value || `${yearValue}-01`;
+                            const monthPart = (existingMonth.split('-')[1] || '01');
+                            ledgerRangeMonthInput.value = `${yearValue}-${monthPart}`;
+                            syncLedgerRangeFromMonth();
+                        }
+                        renderLedgerSection();
+                    });
+                }
+                if (ledgerRangeStartInput) ledgerRangeStartInput.addEventListener('change', renderLedgerSection);
+                if (ledgerRangeEndInput) ledgerRangeEndInput.addEventListener('change', renderLedgerSection);
+                const ledgerMiniTabButtons = document.querySelectorAll('#ledger-mini-tabs .ledger-mini-tab-btn');
+                ledgerMiniTabButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        activeLedgerMiniTab = btn.getAttribute('data-ledger-mini-tab') || 'all';
+                        renderLedgerSection();
+                    });
+                });
                 const ledgerFilterClearBtn = document.getElementById('ledger-filter-clear-btn');
+                const ledgerFilterAllBtn = document.getElementById('ledger-filter-all-btn');
+                if (ledgerFilterAllBtn) {
+                    ledgerFilterAllBtn.addEventListener('click', () => {
+                        if (ledgerRangeMonthInput) ledgerRangeMonthInput.value = '';
+                        if (ledgerRangeYearInput) ledgerRangeYearInput.value = '';
+                        if (ledgerRangeStartInput) ledgerRangeStartInput.value = '';
+                        if (ledgerRangeEndInput) ledgerRangeEndInput.value = '';
+                        renderLedgerSection();
+                    });
+                }
                 if (ledgerFilterClearBtn) {
                     ledgerFilterClearBtn.addEventListener('click', () => {
-                        const monthInput = document.getElementById('ledger-month-focus');
-                        if (monthInput) monthInput.value = getCurrentMonth();
-                        if (ledgerViewFilter) ledgerViewFilter.value = 'selected-month';
-                        if (ledgerStatusFilter) ledgerStatusFilter.value = 'all';
+                        const currentMonth = getCurrentMonth();
+                        const bounds = getMonthBounds(currentMonth);
+                        if (ledgerRangeMonthInput) ledgerRangeMonthInput.value = currentMonth;
+                        if (ledgerRangeYearInput) ledgerRangeYearInput.value = String(new Date().getFullYear());
+                        if (ledgerRangeStartInput) ledgerRangeStartInput.value = bounds.startDate;
+                        if (ledgerRangeEndInput) ledgerRangeEndInput.value = bounds.endDate;
+                        activeLedgerMiniTab = 'all';
                         renderLedgerSection();
                     });
                 }
